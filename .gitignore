@@ -31,3 +31,5 @@ backend/.env
 *.njsproj
 *.sln
 *.sw?
+
+.vercel
