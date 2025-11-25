@@ -257,17 +257,19 @@ app.post('/api/admin/teachers', requireAdmin, async (req, res) => {
   try {
     const { name, subject, system } = req.body || {};
 
-    if (!name || !subject || !system) {
-      return res.status(400).json({ error: 'name, subject, and system required' });
+    if (!name || !subject) {
+      return res.status(400).json({ error: 'name and subject required' });
     }
 
-    if (system !== 'dual' && system !== 'vollzeit') {
+    const teacherSystem = system || 'dual'; // Fallback to dual if not provided
+
+    if (teacherSystem !== 'dual' && teacherSystem !== 'vollzeit') {
       return res.status(400).json({ error: 'system must be "dual" or "vollzeit"' });
     }
 
     const { data, error } = await supabase
       .from('teachers')
-      .insert({ name: name.trim(), subject: subject.trim(), system: system })
+      .insert({ name: name.trim(), subject: subject.trim(), system: teacherSystem })
       .select()
       .single();
     
@@ -291,17 +293,19 @@ app.put('/api/admin/teachers/:id', requireAdmin, async (req, res) => {
   try {
     const { name, subject, system } = req.body || {};
 
-    if (!name || !subject || !system) {
-      return res.status(400).json({ error: 'name, subject, and system required' });
+    if (!name || !subject) {
+      return res.status(400).json({ error: 'name and subject required' });
     }
 
-    if (system !== 'dual' && system !== 'vollzeit') {
+    const teacherSystem = system || 'dual'; // Fallback to dual if not provided
+
+    if (teacherSystem !== 'dual' && teacherSystem !== 'vollzeit') {
       return res.status(400).json({ error: 'system must be "dual" or "vollzeit"' });
     }
 
     const { data, error } = await supabase
       .from('teachers')
-      .update({ name: name.trim(), subject: subject.trim(), system: system })
+      .update({ name: name.trim(), subject: subject.trim(), system: teacherSystem })
       .eq('id', teacherId)
       .select()
       .single();
