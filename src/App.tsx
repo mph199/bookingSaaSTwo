@@ -6,10 +6,19 @@ import { LoginPage } from './pages/LoginPage';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { Impressum } from './pages/Impressum';
 import { Datenschutz } from './pages/Datenschutz';
+import { MaintenancePage } from './pages/MaintenancePage';
 import { Footer } from './components/Footer';
 import './App.css'
 
+// Setze auf true um Maintenance-Modus zu aktivieren
+const MAINTENANCE_MODE = true;
+
 function App() {
+  // Zeige Maintenance-Seite wenn aktiviert
+  if (MAINTENANCE_MODE) {
+    return <MaintenancePage />;
+  }
+
   return (
     <BrowserRouter>
       <AuthProvider>
