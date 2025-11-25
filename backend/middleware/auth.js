@@ -25,6 +25,13 @@ export function requireAuth(req, res, next) {
  * Checks if user is authenticated AND has admin role
  */
 export function requireAdmin(req, res, next) {
+  console.log('requireAdmin check:', {
+    hasSession: !!req.session,
+    isAuthenticated: req.session?.isAuthenticated,
+    user: req.session?.user,
+    role: req.session?.user?.role
+  });
+
   if (req.session && req.session.isAuthenticated && req.session.user?.role === 'admin') {
     return next();
   }

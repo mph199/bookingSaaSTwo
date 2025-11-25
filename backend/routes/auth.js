@@ -20,6 +20,34 @@ router.post('/login', async (req, res) => {
   }
 
   try {
+    // First verify credentials against hardcoded admin
+    const isValidAdmin = await verifyCredentials(username, password);
+    
+    if (isValidAdmin) {
+      // Set session for admin user
+      req.session.isAuthenticated = true;
+      req.session.user = { username: ADMIN_USER.username, role: 'admin' };
+
+      console.log('Admin login successful, session:', req.session);
+
+      // Save session explicitly
+      return req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ 
+            error: 'Internal Server Error', 
+            message: 'Failed to save session' 
+          });
+        }
+        
+        return res.json({ 
+          success: true, 
+          message: 'Login successful',
+          user: { username: ADMIN_USER.username, role: 'admin' }
+        });
+      });
+    }
+
     // Check if users table exists and query it
     const { data: users, error } = await supabase
       .from('users')
@@ -28,24 +56,11 @@ router.post('/login', async (req, res) => {
       .limit(1);
 
     if (error) {
-      // Fallback to hardcoded admin if users table doesn't exist yet
-      console.warn('Users table not found, using fallback admin');
-      const isValid = await verifyCredentials(username, password);
-      
-      if (!isValid) {
-        return res.status(401).json({ 
-          error: 'Unauthorized', 
-          message: 'Invalid credentials' 
-        });
-      }
-
-      req.session.isAuthenticated = true;
-      req.session.user = { username: ADMIN_USER.username, role: 'admin' };
-
-      return res.json({ 
-        success: true, 
-        message: 'Login successful',
-        user: { username: ADMIN_USER.username, role: 'admin' }
+      // Users table doesn't exist yet and not admin
+      console.warn('Users table not found and credentials invalid');
+      return res.status(401).json({ 
+        error: 'Unauthorized', 
+        message: 'Invalid credentials' 
       });
     }
 
@@ -58,30 +73,11 @@ router.post('/login', async (req, res) => {
 
     const user = users[0];
     
-    // Verify password (implement proper bcrypt comparison later)
-    const isValid = await verifyCredentials(username, password);
-    
-    if (!isValid) {
-      return res.status(401).json({ 
-        error: 'Unauthorized', 
-        message: 'Invalid credentials' 
-      });
-    }
-
-    // Set session with role and teacherId
-    const userData = {
-      username: user.username,
-      role: user.role,
-      teacherId: user.teacher_id || undefined
-    };
-
-    req.session.isAuthenticated = true;
-    req.session.user = userData;
-
-    res.json({ 
-      success: true, 
-      message: 'Login successful',
-      user: userData
+    // Verify password for database user
+    // TODO: Implement proper password verification for DB users
+    return res.status(401).json({ 
+      error: 'Unauthorized', 
+      message: 'Database user authentication not yet implemented' 
     });
   } catch (err) {
     console.error('Login error:', err);

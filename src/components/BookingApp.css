@@ -196,16 +196,17 @@
 .teacher-cards {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
 .teacher-card {
-  padding: 0.85rem 0.9rem;
+  padding: 1.1rem 1rem;
   border: 2px solid #e5e7eb;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.18s ease;
   background: white;
+  min-height: 48px; /* Touch-Target-Minimum */
 }
 
 .teacher-card:hover {
@@ -269,6 +270,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  min-height: 48px; /* Touch-Target-Minimum */
 }
 
 .slot-card.available:hover {
@@ -391,6 +393,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 48px; /* Touch-Target-Minimum */
 }
 
 .btn-primary {
@@ -443,21 +446,149 @@
   }
 }
 
-@media (max-width: 640px) {
+/* Tablet */
+@media (max-width: 768px) {
   .booking-app {
-    padding: 1rem;
+    padding: 1.5rem;
+    padding-top: 180px;
   }
 
-  .app-header h1 {
-    font-size: 1.75rem;
+  .app-header {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .app-header .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .app-header .header-logo {
+    width: 200px;
+    max-width: 200px;
+    flex: 0 0 200px;
+  }
+
+  .admin-button {
+    position: static;
+    margin-top: 1rem;
+    width: 100%;
+    text-align: center;
   }
 
   .slots-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
   }
 
+  .teacher-card,
+  .slot-card {
+    padding: 1rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .booking-app {
+    padding: 1rem;
+    padding-top: 160px;
+  }
+
+  .app-header {
+    padding: 1rem;
+  }
+
+  .app-header .header-title {
+    font-size: 1.25rem;
+  }
+
+  .app-header .header-date {
+    font-size: 1rem;
+  }
+
+  .app-header p {
+    font-size: 0.95rem;
+  }
+
+  /* Horizontal Scrolling für Lehrer-Liste */
+  .teacher-cards {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 0.75rem;
+    padding-bottom: 0.5rem;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .teacher-card {
+    flex: 0 0 75%;
+    max-width: 280px;
+    scroll-snap-align: start;
+  }
+
+  /* Single Column für Slots */
+  .slots-container {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .slot-card {
+    padding: 1rem;
+  }
+
+  /* Bottom-Fixed Buttons im Formular */
   .form-actions {
     flex-direction: column;
+    gap: 0.75rem;
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 1rem 0 0;
+    margin-top: 1rem;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 1rem;
+  }
+}
+
+/* Kleine Phones */
+@media (max-width: 480px) {
+  .booking-app {
+    padding: 0.75rem;
+    padding-top: 150px;
+  }
+
+  .app-header .header-title {
+    font-size: 1.1rem;
+  }
+
+  .teacher-card {
+    flex: 0 0 85%;
+  }
+
+  .slot-card {
+    padding: 0.875rem;
+  }
+}
+
+/* Sehr kleine Phones */
+@media (max-width: 375px) {
+  .booking-app {
+    padding: 0.5rem;
+    padding-top: 140px;
+  }
+
+  .app-header {
+    padding: 0.75rem;
+  }
+
+  .app-header .header-title {
+    font-size: 1rem;
+  }
+
+  .teacher-card {
+    flex: 0 0 90%;
   }
 }
 
@@ -500,4 +631,16 @@ button:focus-visible,
 input:focus-visible {
   outline: 3px solid #10b981;
   outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

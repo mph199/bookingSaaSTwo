@@ -252,13 +252,50 @@ app.delete('/api/admin/bookings/:slotId', requireAuth, async (req, res) => {
   }
 });
 
+// Helper function to generate time slots
+function generateTimeSlots(system) {
+  const slots = [];
+  let startHour, startMinute, endHour, endMinute;
+  
+  if (system === 'vollzeit') {
+    startHour = 17;
+    startMinute = 0;
+    endHour = 19;
+    endMinute = 0;
+  } else { // dual
+    startHour = 16;
+    startMinute = 0;
+    endHour = 18;
+    endMinute = 0;
+  }
+  
+  let currentHour = startHour;
+  let currentMinute = startMinute;
+  
+  while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
+    const endSlotHour = currentMinute === 45 ? currentHour + 1 : currentHour;
+    const endSlotMinute = currentMinute === 45 ? 0 : currentMinute + 15;
+    
+    const timeString = `${String(currentHour).padStart(2, '0')}:${String(currentMinute).padStart(2, '0')} - ${String(endSlotHour).padStart(2, '0')}:${String(endSlotMinute).padStart(2, '0')}`;
+    slots.push(timeString);
+    
+    currentMinute += 15;
+    if (currentMinute >= 60) {
+      currentMinute = 0;
+      currentHour += 1;
+    }
+  }
+  
+  return slots;
+}
+
 // POST /api/admin/teachers - Create new teacher
 app.post('/api/admin/teachers', requireAdmin, async (req, res) => {
   try {
     const { name, subject, system } = req.body || {};
 
-    if (!name || !subject) {
-      return res.status(400).json({ error: 'name and subject required' });
+    if (!name) {
+      return res.status(400).json({ error: 'name required' });
     }
 
     const teacherSystem = system || 'dual'; // Fallback to dual if not provided
@@ -267,15 +304,40 @@ app.post('/api/admin/teachers', requireAdmin, async (req, res) => {
       return res.status(400).json({ error: 'system must be "dual" or "vollzeit"' });
     }
 
-    const { data, error } = await supabase
+    // Create teacher
+    const { data: teacher, error: teacherError } = await supabase
       .from('teachers')
-      .insert({ name: name.trim(), subject: subject.trim(), system: teacherSystem })
+      .insert({ name: name.trim(), subject: subject || 'Sprechstunde', system: teacherSystem })
       .select()
       .single();
     
-    if (error) throw error;
+    if (teacherError) throw teacherError;
 
-    res.json({ success: true, teacher: data });
+    // Generate time slots based on system
+    const timeSlots = generateTimeSlots(teacherSystem);
+    
+    // Create slots for the teacher
+    // Default date can be set later by admin
+    const currentDate = new Date();
+    const dateString = currentDate.toLocaleDateString('de-DE');
+    
+    const slotsToInsert = timeSlots.map(time => ({
+      teacher_id: teacher.id,
+      time: time,
+      date: dateString,
+      booked: false
+    }));
+
+    const { error: slotsError } = await supabase
+      .from('slots')
+      .insert(slotsToInsert);
+    
+    if (slotsError) {
+      console.error('Error creating slots:', slotsError);
+      // Don't fail the teacher creation if slots fail
+    }
+
+    res.json({ success: true, teacher, slotsCreated: timeSlots.length });
   } catch (error) {
     console.error('Error creating teacher:', error);
     res.status(500).json({ error: 'Failed to create teacher' });
@@ -293,8 +355,8 @@ app.put('/api/admin/teachers/:id', requireAdmin, async (req, res) => {
   try {
     const { name, subject, system } = req.body || {};
 
-    if (!name || !subject) {
-      return res.status(400).json({ error: 'name and subject required' });
+    if (!name) {
+      return res.status(400).json({ error: 'name required' });
     }
 
     const teacherSystem = system || 'dual'; // Fallback to dual if not provided
@@ -305,7 +367,7 @@ app.put('/api/admin/teachers/:id', requireAdmin, async (req, res) => {
 
     const { data, error } = await supabase
       .from('teachers')
-      .update({ name: name.trim(), subject: subject.trim(), system: teacherSystem })
+      .update({ name: name.trim(), subject: subject || 'Sprechstunde', system: teacherSystem })
       .eq('id', teacherId)
       .select()
       .single();

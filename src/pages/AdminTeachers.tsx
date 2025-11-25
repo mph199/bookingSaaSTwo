@@ -11,7 +11,7 @@ export function AdminTeachers() {
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<ApiTeacher | null>(null);
-  const [formData, setFormData] = useState({ name: '', subject: '', system: 'dual' as 'dual' | 'vollzeit' });
+  const [formData, setFormData] = useState({ name: '', system: 'dual' as 'dual' | 'vollzeit' });
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -35,7 +35,7 @@ export function AdminTeachers() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.subject.trim()) {
+    if (!formData.name.trim()) {
       alert('Bitte alle Felder ausfüllen');
       return;
     }
@@ -49,7 +49,7 @@ export function AdminTeachers() {
       await loadTeachers();
       setShowForm(false);
       setEditingTeacher(null);
-      setFormData({ name: '', subject: '', system: 'dual' });
+      setFormData({ name: '', system: 'dual' });
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Fehler beim Speichern');
     }
@@ -59,7 +59,6 @@ export function AdminTeachers() {
     setEditingTeacher(teacher);
     setFormData({ 
       name: teacher.name, 
-      subject: teacher.subject, 
       system: teacher.system || 'dual' // Fallback falls system undefined ist
     });
     setShowForm(true);
@@ -81,7 +80,7 @@ export function AdminTeachers() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingTeacher(null);
-    setFormData({ name: '', subject: '', system: 'dual' });
+    setFormData({ name: '', system: 'dual' });
   };
 
   const handleLogout = async () => {
@@ -152,17 +151,6 @@ export function AdminTeachers() {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="subject">Fach</label>
-                <input
-                  id="subject"
-                  type="text"
-                  value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  placeholder="z.B. Mathematik"
-                  required
-                />
-              </div>
-              <div className="form-group">
                 <label htmlFor="system">System</label>
                 <select
                   id="system"
@@ -197,7 +185,6 @@ export function AdminTeachers() {
                 <tr>
                   <th>ID</th>
                   <th>Name</th>
-                  <th>Fach</th>
                   <th>System</th>
                   <th>Sprechstunde</th>
                   <th>Aktionen</th>
@@ -208,7 +195,6 @@ export function AdminTeachers() {
                   <tr key={teacher.id}>
                     <td>{teacher.id}</td>
                     <td className="teacher-name">{teacher.name}</td>
-                    <td>{teacher.subject}</td>
                     <td>{teacher.system === 'vollzeit' ? 'Vollzeit' : 'Dual'}</td>
                     <td>{teacher.system === 'vollzeit' ? '17:00 - 19:00 Uhr' : '16:00 - 18:00 Uhr'}</td>
                     <td>

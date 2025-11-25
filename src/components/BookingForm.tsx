@@ -65,6 +65,7 @@ export const BookingForm = ({
               setFormData({ ...formData, parentName: e.target.value })
             }
             placeholder="z.B. Familie Müller"
+            autoComplete="name"
             required
           />
         </div>
@@ -79,6 +80,7 @@ export const BookingForm = ({
               setFormData({ ...formData, studentName: e.target.value })
             }
             placeholder="z.B. Max Müller"
+            autoComplete="off"
             required
           />
         </div>
@@ -93,6 +95,8 @@ export const BookingForm = ({
               setFormData({ ...formData, className: e.target.value })
             }
             placeholder="z.B. 5a"
+            autoComplete="off"
+            inputMode="text"
             required
           />
         </div>

@@ -33,7 +33,6 @@ export const TeacherList = ({
             }}
           >
             <h3>{teacher.name}</h3>
-            <p className="subject">{teacher.subject}</p>
           </div>
         ))}
       </div>
