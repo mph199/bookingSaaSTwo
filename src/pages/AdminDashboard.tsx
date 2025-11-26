@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import { api } from '../services/api';
 import type { ApiBooking } from '../services/api';
+import { exportBookingsToICal } from '../utils/icalExport';
 import './AdminDashboard.css';
 
 export function AdminDashboard() {
@@ -124,6 +125,15 @@ export function AdminDashboard() {
               {user?.role === 'teacher' ? 'Meine gebuchten Termine' : 'Gebuchte Termine'}
             </div>
           </div>
+          {bookings.length > 0 && (
+            <button
+              onClick={() => exportBookingsToICal(bookings)}
+              className="btn-primary"
+              style={{ marginLeft: '1rem' }}
+            >
+              📅 Alle als Kalender exportieren
+            </button>
+          )}
         </div>
 
         {error && (

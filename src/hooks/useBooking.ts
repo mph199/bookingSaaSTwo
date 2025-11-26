@@ -8,6 +8,7 @@ export const useBooking = (selectedTeacherId: number | null) => {
   const [message, setMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const [lastBookedSlot, setLastBookedSlot] = useState<TimeSlot | null>(null);
 
   // Lade Slots wenn Lehrkraft ausgewählt wird
   useEffect(() => {
@@ -56,6 +57,7 @@ export const useBooking = (selectedTeacherId: number | null) => {
             slot.id === selectedSlotId ? response.updatedSlot! : slot
           )
         );
+        setLastBookedSlot(response.updatedSlot);
         setMessage('Buchung erfolgreich!');
         setSelectedSlotId(null);
       } else {
@@ -81,6 +83,7 @@ export const useBooking = (selectedTeacherId: number | null) => {
     message,
     loading,
     error,
+    lastBookedSlot,
     handleSelectSlot,
     handleBooking,
     resetSelection,

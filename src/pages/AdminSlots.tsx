@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import { api } from '../services/api';
 import type { ApiSlot, ApiTeacher } from '../services/api';
+import { exportTeacherSlotsToICal } from '../utils/icalExport';
 import './AdminDashboard.css';
 
 export function AdminSlots() {
@@ -230,9 +231,21 @@ export function AdminSlots() {
           <>
             {selectedTeacher && (
               <div className="settings-info" style={{ marginBottom: '1.5rem' }}>
-                <h3>Slots für {selectedTeacher.name}</h3>
-                <p>System: {selectedTeacher.system === 'vollzeit' ? 'Vollzeit (17:00 - 19:00)' : 'Dual (16:00 - 18:00)'}</p>
-                <p>Anzahl Slots: {slots.length}</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h3>Slots für {selectedTeacher.name}</h3>
+                    <p>System: {selectedTeacher.system === 'vollzeit' ? 'Vollzeit (17:00 - 19:00)' : 'Dual (16:00 - 18:00)'}</p>
+                    <p>Anzahl Slots: {slots.length} ({slots.filter(s => s.booked).length} gebucht)</p>
+                  </div>
+                  {slots.filter(s => s.booked).length > 0 && (
+                    <button
+                      onClick={() => exportTeacherSlotsToICal(slots, selectedTeacher.name)}
+                      className="btn-primary"
+                    >
+                      📅 Termine exportieren
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 

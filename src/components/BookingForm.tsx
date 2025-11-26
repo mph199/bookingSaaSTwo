@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import type { BookingFormData } from '../types';
+import { exportSlotToICal } from '../utils/icalExport';
+import type { ApiSlot } from '../services/api';
 
 interface BookingFormProps {
   selectedSlotId: number | null;
   onSubmit: (formData: BookingFormData) => void;
   onCancel: () => void;
   message: string;
+  bookedSlot?: ApiSlot;
+  teacherName?: string;
 }
 
 export const BookingForm = ({
@@ -14,6 +18,8 @@ export const BookingForm = ({
   onSubmit,
   onCancel,
   message,
+  bookedSlot,
+  teacherName,
 }: BookingFormProps) => {
   const [formData, setFormData] = useState<BookingFormData>({
     parentName: '',
@@ -122,6 +128,16 @@ export const BookingForm = ({
           aria-live="polite"
         >
           {message}
+          {message.includes('erfolgreich') && bookedSlot && teacherName && (
+            <button
+              type="button"
+              onClick={() => exportSlotToICal(bookedSlot, teacherName)}
+              className="btn btn-primary"
+              style={{ marginTop: '10px' }}
+            >
+              📅 Zum Kalender hinzufügen
+            </button>
+          )}
         </div>
       )}
     </div>
