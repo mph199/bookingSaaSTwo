@@ -11,7 +11,7 @@ export function AdminTeachers() {
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<ApiTeacher | null>(null);
-  const [formData, setFormData] = useState({ name: '', system: 'dual' as 'dual' | 'vollzeit' });
+  const [formData, setFormData] = useState({ name: '', system: 'dual' as 'dual' | 'vollzeit', room: '' });
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -49,7 +49,7 @@ export function AdminTeachers() {
       await loadTeachers();
       setShowForm(false);
       setEditingTeacher(null);
-      setFormData({ name: '', system: 'dual' });
+      setFormData({ name: '', system: 'dual', room: '' });
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Fehler beim Speichern');
     }
@@ -59,7 +59,8 @@ export function AdminTeachers() {
     setEditingTeacher(teacher);
     setFormData({ 
       name: teacher.name, 
-      system: teacher.system || 'dual' // Fallback falls system undefined ist
+      system: teacher.system || 'dual', // Fallback falls system undefined ist
+      room: teacher.room || ''
     });
     setShowForm(true);
   };
@@ -80,7 +81,7 @@ export function AdminTeachers() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingTeacher(null);
-    setFormData({ name: '', system: 'dual' });
+    setFormData({ name: '', system: 'dual', room: '' });
   };
 
   const handleLogout = async () => {
@@ -165,6 +166,16 @@ export function AdminTeachers() {
                   <option value="vollzeit">Vollzeit System (17:00 - 19:00 Uhr)</option>
                 </select>
               </div>
+              <div className="form-group">
+                <label htmlFor="room">Raum</label>
+                <input
+                  id="room"
+                  type="text"
+                  value={formData.room}
+                  onChange={(e) => setFormData({ ...formData, room: e.target.value })}
+                  placeholder="z.B. Raum 101"
+                />
+              </div>
               <div className="form-actions">
                 <button type="submit" className="btn-primary">
                   {editingTeacher ? 'Speichern' : 'Anlegen'}
@@ -190,6 +201,7 @@ export function AdminTeachers() {
                   <th>Name</th>
                   <th>System</th>
                   <th>Sprechstunde</th>
+                  <th>Raum</th>
                   <th>Aktionen</th>
                 </tr>
               </thead>
@@ -200,6 +212,7 @@ export function AdminTeachers() {
                     <td className="teacher-name">{teacher.name}</td>
                     <td>{teacher.system === 'vollzeit' ? 'Vollzeit' : 'Dual'}</td>
                     <td>{teacher.system === 'vollzeit' ? '17:00 - 19:00 Uhr' : '16:00 - 18:00 Uhr'}</td>
+                    <td>{teacher.room || '-'}</td>
                     <td>
                       <div className="action-buttons">
                         <button

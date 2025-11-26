@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import { api } from '../services/api';
@@ -18,7 +18,7 @@ export function AdminSlots() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const loadTeachers = async () => {
+  const loadTeachers = useCallback(async () => {
     try {
       const data = await api.getTeachers();
       setTeachers(data);
@@ -28,7 +28,7 @@ export function AdminSlots() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Laden der Lehrkräfte');
     }
-  };
+  }, [selectedTeacherId]);
 
   const loadSlots = async (teacherId: number) => {
     try {
@@ -45,7 +45,7 @@ export function AdminSlots() {
 
   useEffect(() => {
     loadTeachers();
-  }, []);
+  }, [loadTeachers]);
 
   useEffect(() => {
     if (selectedTeacherId) {

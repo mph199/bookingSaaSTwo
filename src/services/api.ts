@@ -5,6 +5,7 @@ export interface ApiTeacher {
   name: string;
   subject: string;
   system: 'dual' | 'vollzeit';
+  room?: string;
 }
 
 export interface ApiSlot {
@@ -204,7 +205,7 @@ export const api = {
       return response.json();
     },
 
-    async createTeacher(teacherData: { name: string; subject?: string; system: 'dual' | 'vollzeit' }): Promise<ApiTeacher> {
+    async createTeacher(teacherData: { name: string; subject?: string; system: 'dual' | 'vollzeit'; room?: string }): Promise<ApiTeacher> {
       const response = await fetch(`${API_BASE}/admin/teachers`, {
         method: 'POST',
         headers: {
@@ -223,7 +224,7 @@ export const api = {
       return data.teacher;
     },
 
-    async updateTeacher(id: number, teacherData: { name: string; subject?: string; system: 'dual' | 'vollzeit' }): Promise<ApiTeacher> {
+    async updateTeacher(id: number, teacherData: { name: string; subject?: string; system: 'dual' | 'vollzeit'; room?: string }): Promise<ApiTeacher> {
       const response = await fetch(`${API_BASE}/admin/teachers/${id}`, {
         method: 'PUT',
         headers: {

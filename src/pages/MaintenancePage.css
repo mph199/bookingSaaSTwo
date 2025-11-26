@@ -76,6 +76,23 @@
   font-size: 1.1rem;
 }
 
+.maintenance-admin-link {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  opacity: 0.5;
+}
+
+.maintenance-admin-link:hover {
+  opacity: 1;
+  color: #10b981;
+  background: #f3f4f6;
+}
+
 @keyframes float {
   0%, 100% {
     transform: translateY(0);

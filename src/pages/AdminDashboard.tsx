@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import { api } from '../services/api';
@@ -13,7 +13,7 @@ export function AdminDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -30,11 +30,11 @@ export function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     loadBookings();
-  }, [user]); // Reload when user changes
+  }, [loadBookings]);
 
   const handleCancelBooking = async (slotId: number) => {
     if (!confirm('Möchten Sie diese Buchung wirklich stornieren?')) {

@@ -336,7 +336,7 @@ function generateTimeSlots(system) {
 // POST /api/admin/teachers - Create new teacher
 app.post('/api/admin/teachers', requireAdmin, async (req, res) => {
   try {
-    const { name, subject, system } = req.body || {};
+    const { name, subject, system, room } = req.body || {};
 
     if (!name) {
       return res.status(400).json({ error: 'name required' });
@@ -351,7 +351,12 @@ app.post('/api/admin/teachers', requireAdmin, async (req, res) => {
     // Create teacher
     const { data: teacher, error: teacherError } = await supabase
       .from('teachers')
-      .insert({ name: name.trim(), subject: subject || 'Sprechstunde', system: teacherSystem })
+      .insert({ 
+        name: name.trim(), 
+        subject: subject || 'Sprechstunde', 
+        system: teacherSystem,
+        room: room ? room.trim() : null
+      })
       .select()
       .single();
     
@@ -397,7 +402,7 @@ app.put('/api/admin/teachers/:id', requireAdmin, async (req, res) => {
   }
 
   try {
-    const { name, subject, system } = req.body || {};
+    const { name, subject, system, room } = req.body || {};
 
     if (!name) {
       return res.status(400).json({ error: 'name required' });
@@ -411,7 +416,12 @@ app.put('/api/admin/teachers/:id', requireAdmin, async (req, res) => {
 
     const { data, error } = await supabase
       .from('teachers')
-      .update({ name: name.trim(), subject: subject || 'Sprechstunde', system: teacherSystem })
+      .update({ 
+        name: name.trim(), 
+        subject: subject || 'Sprechstunde', 
+        system: teacherSystem,
+        room: room ? room.trim() : null
+      })
       .eq('id', teacherId)
       .select()
       .single();

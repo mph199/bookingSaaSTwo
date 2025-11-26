@@ -2,6 +2,7 @@ export interface Teacher {
   id: number;
   name: string;
   subject: string;
+  room?: string;
 }
 
 export interface TimeSlot {
