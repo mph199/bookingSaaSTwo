@@ -70,9 +70,14 @@ export function AdminDashboard() {
             <h1>BKSB Elternsprechtag - Verwaltung</h1>
             <p className="admin-user">Angemeldet als: <strong>{user?.username}</strong></p>
           </div>
-          <button onClick={handleLogout} className="logout-button">
-            Abmelden
-          </button>
+          <div className="header-actions">
+            <button onClick={() => navigate('/')} className="back-button">
+              ← Zur Buchungsseite
+            </button>
+            <button onClick={handleLogout} className="logout-button">
+              Abmelden
+            </button>
+          </div>
         </div>
       </header>
 

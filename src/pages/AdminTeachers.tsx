@@ -106,8 +106,11 @@ export function AdminTeachers() {
             <p className="admin-user">Angemeldet als: <strong>{user?.username}</strong></p>
           </div>
           <div className="header-actions">
+            <button onClick={() => navigate('/')} className="back-button">
+              ← Zur Buchungsseite
+            </button>
             <button onClick={() => navigate('/admin')} className="back-button">
-              ← Zurück zum Dashboard
+              Dashboard
             </button>
             <button onClick={handleLogout} className="logout-button">
               Abmelden
