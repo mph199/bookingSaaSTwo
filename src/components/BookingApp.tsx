@@ -63,7 +63,7 @@ export const BookingApp = () => {
           <div className="header-content">
           <img
             src="/logo.png"
-            alt="Berufskolleg kaufmännische Schulen Bergisch Gladbach"
+            alt="Logo"
             className="header-logo"
           />
           <div className="header-text">

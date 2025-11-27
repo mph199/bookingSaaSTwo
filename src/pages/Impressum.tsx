@@ -9,7 +9,6 @@ export const Impressum = () => {
         <section>
           <h2>Angaben gemäß § 5 TMG</h2>
           <p>
-            <strong>Berufskolleg kaufmännische Schulen Bergisch Gladbach</strong><br />
             [Straße und Hausnummer]<br />
             [PLZ] [Ort]
           </p>

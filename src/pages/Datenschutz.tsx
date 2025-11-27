@@ -58,7 +58,6 @@ export const Datenschutz = () => {
           <h3>Hinweis zur verantwortlichen Stelle</h3>
           <p>
             Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:<br />
-            <strong>Berufskolleg kaufmännische Schulen Bergisch Gladbach</strong><br />
             [Adresse]<br />
             Telefon: [Telefonnummer]<br />
             E-Mail: [E-Mail-Adresse]
