@@ -35,11 +35,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     try {
       const response = await api.auth.login(username, password);
-      if (response.success && response.user) {
+      if (response.success && response.user && response.token) {
+        localStorage.setItem('auth_token', response.token);
         setIsAuthenticated(true);
         setUser(response.user);
       }
     } catch (error) {
+      localStorage.removeItem('auth_token');
       setIsAuthenticated(false);
       setUser(null);
       throw error;
@@ -52,6 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
+      localStorage.removeItem('auth_token');
       setIsAuthenticated(false);
       setUser(null);
     }

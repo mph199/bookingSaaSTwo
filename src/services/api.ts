@@ -66,10 +66,25 @@ export interface AuthResponse {
 export interface LoginResponse {
   success: boolean;
   message?: string;
+  token?: string;
   user?: {
     username: string;
     role: 'admin' | 'teacher';
     teacherId?: number;
+  };
+}
+
+// Helper function to get auth headers
+function getAuthHeaders(): HeadersInit {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  }
+  return {
+    'Content-Type': 'application/json'
   };
 }
 
@@ -137,7 +152,6 @@ export const api = {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
 
@@ -152,7 +166,7 @@ export const api = {
     async logout(): Promise<{ success: boolean }> {
       const response = await fetch(`${API_BASE}/auth/logout`, {
         method: 'POST',
-        credentials: 'include',
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -165,7 +179,7 @@ export const api = {
 
     async verify(): Promise<AuthResponse> {
       const response = await fetch(`${API_BASE}/auth/verify`, {
-        credentials: 'include',
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -179,7 +193,7 @@ export const api = {
   admin: {
     async getBookings(): Promise<ApiBooking[]> {
       const response = await fetch(`${API_BASE}/admin/bookings`, {
-        credentials: 'include',
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -194,7 +208,7 @@ export const api = {
     async cancelBooking(slotId: number): Promise<{ success: boolean }> {
       const response = await fetch(`${API_BASE}/admin/bookings/${slotId}`, {
         method: 'DELETE',
-        credentials: 'include',
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -208,10 +222,7 @@ export const api = {
     async createTeacher(teacherData: { name: string; subject?: string; system: 'dual' | 'vollzeit'; room?: string }): Promise<ApiTeacher> {
       const response = await fetch(`${API_BASE}/admin/teachers`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: getAuthHeaders(),
         body: JSON.stringify(teacherData),
       });
 
@@ -227,10 +238,7 @@ export const api = {
     async updateTeacher(id: number, teacherData: { name: string; subject?: string; system: 'dual' | 'vollzeit'; room?: string }): Promise<ApiTeacher> {
       const response = await fetch(`${API_BASE}/admin/teachers/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: getAuthHeaders(),
         body: JSON.stringify(teacherData),
       });
 
@@ -246,7 +254,7 @@ export const api = {
     async deleteTeacher(id: number): Promise<{ success: boolean }> {
       const response = await fetch(`${API_BASE}/admin/teachers/${id}`, {
         method: 'DELETE',
-        credentials: 'include',
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -259,7 +267,7 @@ export const api = {
 
     async getSettings(): Promise<ApiSettings> {
       const response = await fetch(`${API_BASE}/admin/settings`, {
-        credentials: 'include',
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -273,10 +281,7 @@ export const api = {
     async updateSettings(settings: { event_name: string; event_date: string }): Promise<ApiSettings> {
       const response = await fetch(`${API_BASE}/admin/settings`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: getAuthHeaders(),
         body: JSON.stringify(settings),
       });
 
@@ -292,10 +297,7 @@ export const api = {
     async createSlot(slotData: { teacher_id: number; time: string; date: string }): Promise<ApiSlot> {
       const response = await fetch(`${API_BASE}/admin/slots`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: getAuthHeaders(),
         body: JSON.stringify(slotData),
       });
 
@@ -311,10 +313,7 @@ export const api = {
     async updateSlot(id: number, slotData: { time: string; date: string }): Promise<ApiSlot> {
       const response = await fetch(`${API_BASE}/admin/slots/${id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: getAuthHeaders(),
         body: JSON.stringify(slotData),
       });
 
@@ -330,7 +329,7 @@ export const api = {
     async deleteSlot(id: number): Promise<{ success: boolean }> {
       const response = await fetch(`${API_BASE}/admin/slots/${id}`, {
         method: 'DELETE',
-        credentials: 'include',
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {

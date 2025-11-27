@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyCredentials, ADMIN_USER } from '../middleware/auth.js';
+import { verifyCredentials, ADMIN_USER, generateToken, verifyToken } from '../middleware/auth.js';
 import { supabase } from '../config/supabase.js';
 
 const router = express.Router();
@@ -24,27 +24,16 @@ router.post('/login', async (req, res) => {
     const isValidAdmin = await verifyCredentials(username, password);
     
     if (isValidAdmin) {
-      // Set session for admin user
-      req.session.isAuthenticated = true;
-      req.session.user = { username: ADMIN_USER.username, role: 'admin' };
+      const user = { username: ADMIN_USER.username, role: 'admin' };
+      const token = generateToken(user);
 
-      console.log('Admin login successful, session:', req.session);
+      console.log('Admin login successful');
 
-      // Save session explicitly
-      return req.session.save((err) => {
-        if (err) {
-          console.error('Session save error:', err);
-          return res.status(500).json({ 
-            error: 'Internal Server Error', 
-            message: 'Failed to save session' 
-          });
-        }
-        
-        return res.json({ 
-          success: true, 
-          message: 'Login successful',
-          user: { username: ADMIN_USER.username, role: 'admin' }
-        });
+      return res.json({ 
+        success: true, 
+        message: 'Login successful',
+        token,
+        user
       });
     }
 
@@ -90,38 +79,36 @@ router.post('/login', async (req, res) => {
 
 /**
  * POST /api/auth/logout
- * Destroys session
+ * Token wird clientseitig gelöscht
  */
 router.post('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error('Session destroy error:', err);
-      return res.status(500).json({ 
-        error: 'Internal Server Error', 
-        message: 'Logout failed' 
-      });
-    }
-    res.clearCookie('connect.sid');
-    res.json({ 
-      success: true, 
-      message: 'Logout successful' 
-    });
+  res.json({ 
+    success: true, 
+    message: 'Logout successful' 
   });
 });
 
 /**
  * GET /api/auth/verify
- * Checks if session is authenticated
+ * Checks if token is valid
  */
 router.get('/verify', (req, res) => {
-  if (req.session && req.session.isAuthenticated) {
-    return res.json({ 
-      authenticated: true, 
-      user: req.session.user || { username: ADMIN_USER.username }
-    });
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.json({ authenticated: false });
   }
+
+  const token = authHeader.substring(7);
+  const decoded = verifyToken(token);
+  
+  if (!decoded) {
+    return res.json({ authenticated: false });
+  }
+  
   res.json({ 
-    authenticated: false 
+    authenticated: true, 
+    user: { username: decoded.username, role: decoded.role }
   });
 });
 

@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // Admin User Credentials
 export const ADMIN_USER = {
@@ -6,18 +7,57 @@ export const ADMIN_USER = {
   passwordHash: '$2b$10$K7KzIVafYIWYoOIIXB2tTeBmrC16USa2HRzx22cC985UDuRKcDpWS' // bksb2024
 };
 
+const JWT_SECRET = process.env.JWT_SECRET || 'bksb-jwt-secret-2024-change-in-production';
+const JWT_EXPIRES_IN = '8h';
+
 /**
- * Middleware: Requires authenticated session
- * Checks if req.session.isAuthenticated is true
+ * Generate JWT token for user
+ */
+export function generateToken(user) {
+  return jwt.sign(
+    { username: user.username, role: user.role },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
+}
+
+/**
+ * Verify JWT token
+ */
+export function verifyToken(token) {
+  try {
+    return jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Middleware: Requires authenticated token
+ * Checks Authorization header for valid JWT token
  */
 export function requireAuth(req, res, next) {
-  if (req.session && req.session.isAuthenticated) {
-    return next();
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ 
+      error: 'Unauthorized', 
+      message: 'Authentication required' 
+    });
   }
-  return res.status(401).json({ 
-    error: 'Unauthorized', 
-    message: 'Authentication required' 
-  });
+
+  const token = authHeader.substring(7);
+  const decoded = verifyToken(token);
+  
+  if (!decoded) {
+    return res.status(401).json({ 
+      error: 'Unauthorized', 
+      message: 'Invalid or expired token' 
+    });
+  }
+  
+  req.user = decoded;
+  return next();
 }
 
 /**
@@ -25,20 +65,34 @@ export function requireAuth(req, res, next) {
  * Checks if user is authenticated AND has admin role
  */
 export function requireAdmin(req, res, next) {
-  console.log('requireAdmin check:', {
-    hasSession: !!req.session,
-    isAuthenticated: req.session?.isAuthenticated,
-    user: req.session?.user,
-    role: req.session?.user?.role
-  });
-
-  if (req.session && req.session.isAuthenticated && req.session.user?.role === 'admin') {
-    return next();
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ 
+      error: 'Unauthorized', 
+      message: 'Authentication required' 
+    });
   }
-  return res.status(403).json({ 
-    error: 'Forbidden', 
-    message: 'Admin access required' 
-  });
+
+  const token = authHeader.substring(7);
+  const decoded = verifyToken(token);
+  
+  if (!decoded) {
+    return res.status(401).json({ 
+      error: 'Unauthorized', 
+      message: 'Invalid or expired token' 
+    });
+  }
+  
+  if (decoded.role !== 'admin') {
+    return res.status(403).json({ 
+      error: 'Forbidden', 
+      message: 'Admin access required' 
+    });
+  }
+  
+  req.user = decoded;
+  return next();
 }
 
 /**

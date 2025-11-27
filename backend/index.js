@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import session from 'express-session';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import { requireAuth, requireAdmin } from './middleware/auth.js';
@@ -38,28 +37,9 @@ app.use(cors({
     } catch {
       return callback(new Error('Invalid origin'));
     }
-  },
-  credentials: true
-}));
-app.use(express.json());
-
-// Session configuration
-// Enable trust proxy for secure cookies behind Render/Vercel proxies
-app.set('trust proxy', 1);
-
-// Configure session cookies for cross-origin usage (Vercel <-> Render)
-const isProduction = process.env.NODE_ENV === 'production' || (process.env.FRONTEND_URL || '').startsWith('https://');
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'bksb-elternsprechtag-secret-2024',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: isProduction, // requires HTTPS
-    httpOnly: true,
-    sameSite: isProduction ? 'none' : 'lax', // allow cross-site cookies in prod
-    maxAge: 8 * 60 * 60 * 1000 // 8 hours
   }
 }));
+app.use(express.json());
 
 // Simple request logging (can be replaced by morgan later)
 app.use((req, _res, next) => {
