@@ -9,7 +9,7 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -18,8 +18,16 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-      await login(username, password);
-      navigate('/admin');
+      const u = await login(username, password);
+      // Direkt anhand der Rolle weiterleiten (kein Timeout nötig)
+      if (u?.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else if (u?.role === 'teacher') {
+        navigate('/teacher', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login fehlgeschlagen');
     } finally {
@@ -31,7 +39,7 @@ export function LoginPage() {
     <div className="login-page">
       <div className="login-container">
         <div className="login-header">
-          <h1>BKSB Elternsprechtag</h1>
+          <h1>Elternsprechtag</h1>
           <h2>Login</h2>
         </div>
 

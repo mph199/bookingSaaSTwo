@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
+import teacherRoutes from './routes/teacher.js';
 import { requireAuth, requireAdmin } from './middleware/auth.js';
 import { supabase } from './config/supabase.js';
 
@@ -49,6 +50,7 @@ app.use((req, _res, next) => {
 
 // Auth Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/teacher', teacherRoutes);
 
 // Public Routes
 // GET /api/teachers

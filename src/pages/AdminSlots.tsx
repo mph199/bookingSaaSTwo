@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
-import { api } from '../services/api';
-import type { ApiSlot, ApiTeacher } from '../services/api';
+import api from '../services/api';
+import type { TimeSlot as ApiSlot, Teacher as ApiTeacher } from '../types';
 import { exportTeacherSlotsToICal } from '../utils/icalExport';
 import './AdminDashboard.css';
 

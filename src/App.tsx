@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { BookingApp } from './components/BookingApp'
@@ -7,6 +7,7 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminTeachers } from './pages/AdminTeachers';
 import { AdminSettings } from './pages/AdminSettings';
 import { AdminSlots } from './pages/AdminSlots';
+import { TeacherDashboard } from './pages/TeacherDashboard';
 import { Impressum } from './pages/Impressum';
 import { Datenschutz } from './pages/Datenschutz';
 import { MaintenancePage } from './pages/MaintenancePage';
@@ -31,6 +32,16 @@ function App() {
               <Route path="/impressum" element={MAINTENANCE_MODE ? <MaintenancePage /> : <Impressum />} />
               <Route path="/datenschutz" element={MAINTENANCE_MODE ? <MaintenancePage /> : <Datenschutz />} />
               
+              {/* Geschützter Teacher-Bereich */}
+              <Route 
+                path="/teacher"
+                element={
+                  <ProtectedRoute>
+                    <TeacherDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Admin-Bereich ist immer erreichbar, auch im Maintenance-Modus */}
               <Route 
                 path="/admin" 
@@ -64,6 +75,8 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
+              {/* Catch-All: leite unbekannte Pfade auf die Startseite um */}
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>
           <Footer />

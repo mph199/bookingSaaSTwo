@@ -31,3 +31,9 @@ export interface BookingFormData {
   email: string;
   message?: string;
 }
+
+export interface Settings {
+  id?: number;
+  event_name: string;
+  event_date: string;
+}

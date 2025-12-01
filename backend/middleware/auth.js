@@ -14,11 +14,11 @@ const JWT_EXPIRES_IN = '8h';
  * Generate JWT token for user
  */
 export function generateToken(user) {
-  return jwt.sign(
-    { username: user.username, role: user.role },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
-  );
+  const payload = { username: user.username, role: user.role };
+  if (user.teacherId) {
+    payload.teacherId = user.teacherId;
+  }
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
 /**

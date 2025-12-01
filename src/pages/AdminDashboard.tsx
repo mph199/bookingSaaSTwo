@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
-import { api } from '../services/api';
-import type { ApiBooking } from '../services/api';
+import api from '../services/api';
+import type { TimeSlot as ApiBooking } from '../types';
 import { exportBookingsToICal } from '../utils/icalExport';
 import './AdminDashboard.css';
 

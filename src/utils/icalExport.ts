@@ -1,4 +1,4 @@
-import type { ApiSlot, ApiBooking, ApiSettings } from '../services/api';
+import type { TimeSlot as ApiSlot, TimeSlot as ApiBooking, Settings as ApiSettings } from '../types';
 
 /**
  * Generiert eine iCal (.ics) Datei für Kalender-Export

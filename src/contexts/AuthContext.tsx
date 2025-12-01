@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { api } from '../services/api';
+import api from '../services/api';
 import { AuthContext } from './AuthContextBase.ts';
 import type { User } from './AuthContextBase.ts';
 
@@ -48,6 +48,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     verifyAuth();
   }, []);
 
+  // Sofortige Reaktion auf 401-Events aus dem API-Client
+  useEffect(() => {
+    const onForcedLogout = () => {
+      localStorage.removeItem('auth_token');
+      setIsAuthenticated(false);
+      setUser(null);
+    };
+    window.addEventListener('auth:logout', onForcedLogout);
+    return () => window.removeEventListener('auth:logout', onForcedLogout);
+  }, []);
+
   const login = async (username: string, password: string) => {
     try {
       const response = await api.auth.login(username, password);
@@ -55,7 +66,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('auth_token', response.token);
         setIsAuthenticated(true);
         setUser(response.user);
+        return response.user as User;
       }
+      throw new Error('Login fehlgeschlagen');
     } catch (error) {
       localStorage.removeItem('auth_token');
       setIsAuthenticated(false);

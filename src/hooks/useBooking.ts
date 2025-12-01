@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { TimeSlot, BookingFormData } from '../types';
-import { api } from '../services/api';
+import api from '../services/api';
 
 export const useBooking = (selectedTeacherId: number | null) => {
   const [slots, setSlots] = useState<TimeSlot[]>([]);

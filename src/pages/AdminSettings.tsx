@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
-import { api } from '../services/api';
-import type { ApiSettings } from '../services/api';
+import api from '../services/api';
+import type { Settings as ApiSettings } from '../types';
 import './AdminDashboard.css';
 
 export function AdminSettings() {

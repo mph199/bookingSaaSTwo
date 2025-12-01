@@ -1,342 +1,164 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'https://elternsprechtagneu.onrender.com/api';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-export interface ApiTeacher {
-  id: number;
-  name: string;
-  subject: string;
-  system: 'dual' | 'vollzeit';
-  room?: string;
-}
+const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000/api';
 
-export interface ApiSlot {
-  id: number;
-  teacherId: number;
-  time: string;
-  date: string;
-  booked: boolean;
-  visitorType?: 'parent' | 'company';
-  parentName?: string;
-  companyName?: string;
-  studentName?: string;
-  traineeName?: string;
-  className?: string;
-  email?: string;
-  message?: string;
-}
-
-export interface ApiBookingRequest {
-  visitorType: 'parent' | 'company';
-  parentName?: string;
-  companyName?: string;
-  studentName?: string;
-  traineeName?: string;
-  className: string;
-  email: string;
-  message?: string;
-}
-
-export interface ApiBookingResponse {
-  success: boolean;
-  message?: string;
-  updatedSlot?: ApiSlot;
-}
-
-export interface ApiBooking extends ApiSlot {
-  teacherName: string;
-  teacherSubject: string;
-}
-
-export interface ApiSettings {
-  id: number;
-  event_name: string;
-  event_date: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface AuthResponse {
-  authenticated: boolean;
-  user?: {
-    username: string;
-    role: 'admin' | 'teacher';
-    teacherId?: number;
-  };
-}
-
-export interface LoginResponse {
-  success: boolean;
-  message?: string;
-  token?: string;
-  user?: {
-    username: string;
-    role: 'admin' | 'teacher';
-    teacherId?: number;
-  };
-}
-
-// Helper function to get auth headers
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('auth_token');
-  if (token) {
-    return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    };
-  }
-  return {
-    'Content-Type': 'application/json'
-  };
+  return token
+    ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+    : { 'Content-Type': 'application/json' };
 }
 
-export const api = {
-  async getTeachers(): Promise<ApiTeacher[]> {
-    const response = await fetch(`${API_BASE}/teachers`);
-    if (!response.ok) {
-      throw new Error('Fehler beim Laden der Lehrkräfte');
-    }
-    const data = await response.json();
-    return data.teachers;
-  },
+async function requestJSON(path: string, options: RequestInit & { auth?: boolean } = {}) {
+  const { auth = false, headers, ...rest } = options as any;
+  const baseHeaders = auth ? getAuthHeaders() : { 'Content-Type': 'application/json' };
+  const mergedHeaders = { ...baseHeaders, ...(headers || {}) } as HeadersInit;
 
-  async getSlots(teacherId: number): Promise<ApiSlot[]> {
-    const response = await fetch(`${API_BASE}/slots?teacherId=${teacherId}`);
-    if (!response.ok) {
-      throw new Error('Fehler beim Laden der Termine');
-    }
-    const data = await response.json();
-    return data.slots;
-  },
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, { ...rest, headers: mergedHeaders });
+  } catch (err) {
+    throw new Error('Netzwerkfehler – bitte Verbindung prüfen.');
+  }
 
-  async createBooking(
-    slotId: number,
-    bookingData: ApiBookingRequest
-  ): Promise<ApiBookingResponse> {
-    const response = await fetch(`${API_BASE}/bookings`, {
+  const tryParse = async () => {
+    const text = await response.text();
+    try {
+      return text ? JSON.parse(text) : null;
+    } catch {
+      return { message: text || null } as any;
+    }
+  };
+
+  if (!response.ok) {
+    const data = await tryParse();
+    const status = response.status;
+    const message = (data && ((data as any).message || (data as any).error)) || `Fehler ${status}`;
+    if (status === 401) {
+      localStorage.removeItem('auth_token');
+      try {
+        window.dispatchEvent(new Event('auth:logout'));
+      } catch {}
+      throw new Error('Nicht angemeldet (401) – bitte neu einloggen.');
+    }
+    throw new Error(typeof message === 'string' ? message : 'Unbekannter Fehler');
+  }
+
+  return await tryParse();
+}
+
+const api = {
+  // Public endpoints
+  async getTeachers() {
+    const res = await requestJSON('/teachers');
+    return (res && (res as any).teachers) || [];
+  },
+  async getSlots(teacherId: number) {
+    const res = await requestJSON(`/slots?teacherId=${encodeURIComponent(String(teacherId))}`);
+    return (res && (res as any).slots) || [];
+  },
+  async createBooking(slotId: number, formData: any) {
+    return requestJSON('/bookings', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        slotId,
-        ...bookingData,
-      }),
+      body: JSON.stringify({ slotId, ...formData }),
     });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Fehler beim Buchen');
-    }
-
-    return response.json();
+  },
+  async health() {
+    return requestJSON('/health');
   },
 
-  async getHealth(): Promise<{ status: string; teacherCount: number; slotCount: number; bookedCount: number }> {
-    const response = await fetch(`${API_BASE}/health`);
-    if (!response.ok) {
-      throw new Error('Backend nicht erreichbar');
-    }
-    return response.json();
-  },
-
+  // Auth endpoints
   auth: {
-    async login(username: string, password: string): Promise<LoginResponse> {
-      const response = await fetch(`${API_BASE}/auth/login`, {
+    async login(username: string, password: string) {
+      return requestJSON('/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login fehlgeschlagen');
-      }
-
-      return response.json();
     },
-
-    async logout(): Promise<{ success: boolean }> {
-      const response = await fetch(`${API_BASE}/auth/logout`, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Logout fehlgeschlagen');
+    async verify() {
+      try {
+        const data = await requestJSON('/auth/verify', { auth: true });
+        return data || { authenticated: false } as any;
+      } catch (e) {
+        return { authenticated: false } as any;
       }
-
-      return response.json();
     },
-
-    async verify(): Promise<AuthResponse> {
-      const response = await fetch(`${API_BASE}/auth/verify`, {
-        headers: getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error('Authentifizierung fehlgeschlagen');
-      }
-
-      return response.json();
+    async logout() {
+      return requestJSON('/auth/logout', { method: 'DELETE', auth: true });
     },
   },
 
+  // Admin endpoints
   admin: {
-    async getBookings(): Promise<ApiBooking[]> {
-      const response = await fetch(`${API_BASE}/admin/bookings`, {
-        headers: getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Fehler beim Laden der Buchungen');
-      }
-
-      const data = await response.json();
-      return data.bookings;
+    async getBookings() {
+      const res = await requestJSON('/admin/bookings', { auth: true });
+      return (res && (res as any).bookings) || [];
     },
-
-    async cancelBooking(slotId: number): Promise<{ success: boolean }> {
-      const response = await fetch(`${API_BASE}/admin/bookings/${slotId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Fehler beim Stornieren');
-      }
-
-      return response.json();
+    async cancelBooking(bookingId: number) {
+      // Backend erwartet DELETE /api/admin/bookings/:slotId
+      return requestJSON(`/admin/bookings/${bookingId}`, { method: 'DELETE', auth: true });
     },
-
-    async createTeacher(teacherData: { name: string; subject?: string; system: 'dual' | 'vollzeit'; room?: string }): Promise<ApiTeacher> {
-      const response = await fetch(`${API_BASE}/admin/teachers`, {
+    async getTeachers() {
+      return requestJSON('/admin/teachers', { auth: true });
+    },
+    async createTeacher(payload: any) {
+      return requestJSON('/admin/teachers', {
         method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          ...teacherData,
-          subject: teacherData.subject ?? 'Sprechstunde',
-        }),
+        auth: true,
+        body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || error.message || 'Fehler beim Anlegen der Lehrkraft');
-      }
-
-      const data = await response.json();
-      return data.teacher;
     },
-
-    async updateTeacher(id: number, teacherData: { name: string; subject?: string; system: 'dual' | 'vollzeit'; room?: string }): Promise<ApiTeacher> {
-      const response = await fetch(`${API_BASE}/admin/teachers/${id}`, {
+    async updateTeacher(id: number, payload: any) {
+      return requestJSON(`/admin/teachers/${id}`, {
         method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          ...teacherData,
-          subject: teacherData.subject ?? 'Sprechstunde',
-        }),
+        auth: true,
+        body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Fehler beim Aktualisieren der Lehrkraft');
-      }
-
-      const data = await response.json();
-      return data.teacher;
     },
-
-    async deleteTeacher(id: number): Promise<{ success: boolean }> {
-      const response = await fetch(`${API_BASE}/admin/teachers/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || error.message || 'Fehler beim Löschen der Lehrkraft');
-      }
-
-      return response.json();
+    async deleteTeacher(id: number) {
+      return requestJSON(`/admin/teachers/${id}`, { method: 'DELETE', auth: true });
     },
-
-    async getSettings(): Promise<ApiSettings> {
-      const response = await fetch(`${API_BASE}/admin/settings`, {
-        headers: getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Fehler beim Laden der Einstellungen');
-      }
-
-      return response.json();
+    async getSettings() {
+      return requestJSON('/admin/settings', { auth: true });
     },
-
-    async updateSettings(settings: { event_name: string; event_date: string }): Promise<ApiSettings> {
-      const response = await fetch(`${API_BASE}/admin/settings`, {
+    async updateSettings(payload: any) {
+      return requestJSON('/admin/settings', {
         method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(settings),
+        auth: true,
+        body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Fehler beim Aktualisieren der Einstellungen');
-      }
-
-      const data = await response.json();
-      return data.settings;
     },
-
-    async createSlot(slotData: { teacher_id: number; time: string; date: string }): Promise<ApiSlot> {
-      const response = await fetch(`${API_BASE}/admin/slots`, {
+    async getSlots() {
+      return requestJSON('/admin/slots', { auth: true });
+    },
+    async createSlot(payload: any) {
+      return requestJSON('/admin/slots', {
         method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(slotData),
+        auth: true,
+        body: JSON.stringify(payload),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Fehler beim Anlegen des Slots');
-      }
-
-      const data = await response.json();
-      return data.slot;
     },
-
-    async updateSlot(id: number, slotData: { time: string; date: string }): Promise<ApiSlot> {
-      const response = await fetch(`${API_BASE}/admin/slots/${id}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(slotData),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Fehler beim Aktualisieren des Slots');
-      }
-
-      const data = await response.json();
-      return data.slot;
+    async deleteSlot(id: number) {
+      return requestJSON(`/admin/slots/${id}`, { method: 'DELETE', auth: true });
     },
+  },
 
-    async deleteSlot(id: number): Promise<{ success: boolean }> {
-      const response = await fetch(`${API_BASE}/admin/slots/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Fehler beim Löschen des Slots');
-      }
-
-      return response.json();
+  // Teacher endpoints
+  teacher: {
+    async getBookings() {
+      const res = await requestJSON('/teacher/bookings', { auth: true });
+      return (res && (res as any).bookings) || [];
+    },
+    async getSlots() {
+      const res = await requestJSON('/teacher/slots', { auth: true });
+      return (res && (res as any).slots) || [];
+    },
+    async cancelBooking(bookingId: number) {
+      return requestJSON(`/teacher/bookings/${bookingId}`, { method: 'DELETE', auth: true });
     },
   },
 };
+
+export { API_BASE };
+export default api;
