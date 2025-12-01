@@ -67,6 +67,16 @@ export function TeacherDashboard() {
     }
   };
 
+  const handleAcceptBooking = async (slotId: number) => {
+    try {
+      await api.teacher.acceptBooking(slotId);
+      await loadBookings();
+      setNotice('Buchung bestätigt.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Fehler beim Bestätigen');
+    }
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
@@ -238,6 +248,15 @@ export function TeacherDashboard() {
                         {booking.message || '-'}
                       </td>
                       <td>
+                        {booking.status === 'reserved' && (
+                          <button
+                            onClick={() => handleAcceptBooking(booking.id)}
+                            className="edit-button"
+                            style={{ marginRight: 8 }}
+                          >
+                            Bestätigen
+                          </button>
+                        )}
                         <button
                           onClick={() => handleCancelBooking(booking.id)}
                           className="cancel-button"

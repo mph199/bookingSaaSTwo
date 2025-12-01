@@ -44,8 +44,8 @@ export const SlotList = ({
               </div>
               <div className="slot-date">{slot.date}</div>
               {slot.booked ? (
-                <div className="slot-status booked-status">
-                  <span className="status-badge">Gebucht</span>
+                <div className={`slot-status ${slot.status === 'reserved' ? 'reserved-status' : 'booked-status'}`}>
+                  <span className="status-badge">{slot.status === 'reserved' ? 'Reserviert' : 'Gebucht'}</span>
                 </div>
               ) : (
                 <div className="slot-status available-status">

@@ -11,6 +11,7 @@ export interface TimeSlot {
   time: string;
   date: string;
   booked: boolean;
+  status?: 'reserved' | 'confirmed';
   visitorType?: 'parent' | 'company';
   parentName?: string;
   companyName?: string;

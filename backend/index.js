@@ -96,6 +96,7 @@ app.get('/api/slots', async (req, res) => {
       time: slot.time,
       date: slot.date,
       booked: slot.booked,
+      status: slot.status,
       visitorType: slot.visitor_type,
       parentName: slot.parent_name,
       companyName: slot.company_name,
@@ -138,6 +139,7 @@ app.post('/api/bookings', async (req, res) => {
 
     const updateData = {
       booked: true,
+      status: 'reserved',
       visitor_type: visitorType,
       class_name: className,
       email: email,
@@ -174,6 +176,7 @@ app.post('/api/bookings', async (req, res) => {
       time: data.time,
       date: data.date,
       booked: data.booked,
+      status: data.status,
       visitorType: data.visitor_type,
       parentName: data.parent_name,
       companyName: data.company_name,

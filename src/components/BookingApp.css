@@ -391,6 +391,11 @@
   color: #991b1b;
 }
 
+.reserved-status .status-badge {
+  background: #fef3c7; /* amber-100 */
+  color: #92400e;      /* amber-800 */
+}
+
 .booking-info {
   display: flex;
   flex-direction: column;

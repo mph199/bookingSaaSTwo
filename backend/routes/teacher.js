@@ -49,6 +49,7 @@ router.get('/bookings', requireAuth, requireTeacher, async (req, res) => {
       time: slot.time,
       date: slot.date,
       booked: slot.booked,
+      status: slot.status,
       visitorType: slot.visitor_type,
       parentName: slot.parent_name,
       companyName: slot.company_name,
@@ -96,6 +97,7 @@ router.get('/slots', requireAuth, requireTeacher, async (req, res) => {
       time: slot.time,
       date: slot.date,
       booked: slot.booked,
+      status: slot.status,
       visitorType: slot.visitor_type,
       parentName: slot.parent_name,
       companyName: slot.company_name,
@@ -171,6 +173,7 @@ router.delete('/bookings/:slotId', requireAuth, requireTeacher, async (req, res)
       .from('slots')
       .update({
         booked: false,
+        status: null,
         visitor_type: null,
         parent_name: null,
         company_name: null,
@@ -200,6 +203,45 @@ router.delete('/bookings/:slotId', requireAuth, requireTeacher, async (req, res)
   } catch (error) {
     console.error('Error cancelling booking:', error);
     res.status(500).json({ error: 'Failed to cancel booking' });
+  }
+});
+
+/**
+ * PUT /api/teacher/bookings/:slotId/accept
+ * Accept a reserved booking (set status to confirmed)
+ */
+router.put('/bookings/:slotId/accept', requireAuth, requireTeacher, async (req, res) => {
+  const slotId = parseInt(req.params.slotId, 10);
+  if (isNaN(slotId)) {
+    return res.status(400).json({ error: 'Invalid slotId' });
+  }
+
+  try {
+    const teacherId = req.user.teacherId;
+    if (!teacherId) {
+      return res.status(400).json({ error: 'Teacher ID not found in token' });
+    }
+
+    const { data, error } = await supabase
+      .from('slots')
+      .update({ status: 'confirmed', updated_at: new Date().toISOString() })
+      .eq('id', slotId)
+      .eq('teacher_id', teacherId)
+      .eq('booked', true)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Slot not found or not booked' });
+      }
+      throw error;
+    }
+
+    res.json({ success: true, slot: data });
+  } catch (error) {
+    console.error('Error accepting booking:', error);
+    res.status(500).json({ error: 'Failed to accept booking' });
   }
 });
 

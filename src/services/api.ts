@@ -161,6 +161,9 @@ const api = {
     async cancelBooking(bookingId: number) {
       return requestJSON(`/teacher/bookings/${bookingId}`, { method: 'DELETE', auth: true });
     },
+    async acceptBooking(bookingId: number) {
+      return requestJSON(`/teacher/bookings/${bookingId}/accept`, { method: 'PUT', auth: true });
+    },
   },
 };
 
