@@ -290,6 +290,11 @@
   padding: 1rem;
   border-bottom: 1px solid #f0f0f0;
   color: #555;
+  vertical-align: middle;
+}
+
+.bookings-table th {
+  vertical-align: middle;
 }
 
 .bookings-table tbody tr:hover {
@@ -483,6 +488,14 @@
 .action-buttons {
   display: flex;
   gap: 0.5rem;
+}
+
+/* Ensure inline action buttons align nicely inside table cells */
+.edit-button,
+.cancel-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .logout-button {

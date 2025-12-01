@@ -769,8 +769,10 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend listening on http://localhost:${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+app.listen(PORT, HOST, () => {
+  const printedHost = HOST === '0.0.0.0' ? 'localhost' : HOST;
+  console.log(`Backend listening on http://${printedHost}:${PORT}`);
 });
 
 /*
