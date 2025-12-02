@@ -252,7 +252,7 @@ export function TeacherDashboard() {
                           {booking.status === 'reserved' && (
                             <button
                               onClick={() => handleAcceptBooking(booking.id)}
-                              className="edit-button"
+                              className="btn-primary"
                             >
                               Bestätigen
                             </button>
