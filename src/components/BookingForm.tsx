@@ -180,7 +180,7 @@ export const BookingForm = ({
             onChange={(e) =>
               setFormData({ ...formData, className: e.target.value })
             }
-            placeholder="z.B. 5a"
+            placeholder="z.B. WG25.1"
             required
           />
         </div>

@@ -12,7 +12,8 @@ export function AdminTeachers() {
   const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<ApiTeacher | null>(null);
-  const [formData, setFormData] = useState({ name: '', system: 'dual' as 'dual' | 'vollzeit', room: '' });
+  const [formData, setFormData] = useState({ name: '', system: 'dual' as 'dual' | 'vollzeit', room: '', username: '', password: '' });
+  const [createdCreds, setCreatedCreds] = useState<{ username: string; tempPassword: string } | null>(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -46,18 +47,23 @@ export function AdminTeachers() {
         name: formData.name,
         subject: 'Sprechstunde',
         system: formData.system,
-        room: formData.room
+        room: formData.room,
+        username: formData.username || undefined,
+        password: formData.password || undefined,
       };
       
       if (editingTeacher) {
         await api.admin.updateTeacher(editingTeacher.id, teacherData);
       } else {
-        await api.admin.createTeacher(teacherData);
+        const res = await api.admin.createTeacher(teacherData);
+        if (res && (res as any).user) {
+          setCreatedCreds({ username: (res as any).user.username, tempPassword: (res as any).user.tempPassword });
+        }
       }
       await loadTeachers();
       setShowForm(false);
       setEditingTeacher(null);
-      setFormData({ name: '', system: 'dual', room: '' });
+      setFormData({ name: '', system: 'dual', room: '', username: '', password: '' });
     } catch (err) {
       console.error('Fehler beim Speichern:', err);
       alert(err instanceof Error ? err.message : 'Fehler beim Speichern');
@@ -187,6 +193,30 @@ export function AdminTeachers() {
                   placeholder="z.B. Raum 101"
                 />
               </div>
+              {!editingTeacher && (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="username">Benutzername (optional)</label>
+                    <input
+                      id="username"
+                      type="text"
+                      value={formData.username}
+                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                      placeholder="z.B. herrhuhn"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="password">Passwort (optional, min. 8 Zeichen)</label>
+                    <input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      placeholder="z.B. sicherespasswort"
+                    />
+                  </div>
+                </>
+              )}
               <div className="form-actions">
                 <button type="submit" className="btn-primary">
                   {editingTeacher ? 'Speichern' : 'Anlegen'}
@@ -196,6 +226,31 @@ export function AdminTeachers() {
                 </button>
               </div>
             </form>
+            {!editingTeacher && createdCreds && (
+              <div className="admin-success" style={{ marginTop: '1rem' }}>
+                <div style={{ fontWeight: 700, marginBottom: '0.5rem' }}>Login für Lehrkraft erstellt</div>
+                <div><strong>Benutzername:</strong> {createdCreds.username}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span><strong>Temporäres Passwort:</strong> {createdCreds.tempPassword}</span>
+                  <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => {
+                      try {
+                        navigator.clipboard.writeText(createdCreds.tempPassword);
+                        alert('Passwort kopiert');
+                      } catch {}
+                    }}
+                    style={{ padding: '0.35rem 0.6rem', fontSize: '0.85rem' }}
+                  >
+                    Kopieren
+                  </button>
+                </div>
+                <div style={{ marginTop: '0.5rem', fontSize: '0.9rem' }}>
+                  Bitte sicher weitergeben und nach dem ersten Login ändern.
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -237,6 +292,23 @@ export function AdminTeachers() {
                           className="cancel-button"
                         >
                           Löschen
+                        </button>
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await api.admin.resetTeacherLogin(teacher.id);
+                              if (res && (res as any).user) {
+                                alert(`Login zurückgesetzt\n\nBenutzername: ${(res as any).user.username}\nTemporäres Passwort: ${(res as any).user.tempPassword}`);
+                              } else {
+                                alert('Login zurückgesetzt.');
+                              }
+                            } catch (err) {
+                              alert(err instanceof Error ? err.message : 'Fehler beim Zurücksetzen des Logins');
+                            }
+                          }}
+                          className="edit-button"
+                        >
+                          Login zurücksetzen
                         </button>
                       </div>
                     </td>

@@ -142,6 +142,9 @@ const api = {
     async deleteSlot(id: number) {
       return requestJSON(`/admin/slots/${id}`, { method: 'DELETE', auth: true });
     },
+    async resetTeacherLogin(id: number) {
+      return requestJSON(`/admin/teachers/${id}/reset-login`, { method: 'PUT', auth: true });
+    },
   },
 
   // Teacher endpoints
@@ -163,6 +166,13 @@ const api = {
     },
     async acceptBooking(bookingId: number) {
       return requestJSON(`/teacher/bookings/${bookingId}/accept`, { method: 'PUT', auth: true });
+    },
+    async changePassword(currentPassword: string, newPassword: string) {
+      return requestJSON('/teacher/password', {
+        method: 'PUT',
+        auth: true,
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
     },
   },
 };

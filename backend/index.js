@@ -6,6 +6,7 @@ import teacherRoutes from './routes/teacher.js';
 import { requireAuth, requireAdmin } from './middleware/auth.js';
 import { supabase } from './config/supabase.js';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 import { isEmailConfigured, sendMail } from './config/email.js';
 
 dotenv.config();
@@ -427,10 +428,10 @@ function generateTimeSlots(system) {
   return slots;
 }
 
-// POST /api/admin/teachers - Create new teacher
+// POST /api/admin/teachers - Create new teacher (and login user)
 app.post('/api/admin/teachers', requireAdmin, async (req, res) => {
   try {
-    const { name, subject, system, room } = req.body || {};
+    const { name, subject, system, room, username: reqUsername, password: reqPassword } = req.body || {};
 
     if (!name) {
       return res.status(400).json({ error: 'name required' });
@@ -458,16 +459,24 @@ app.post('/api/admin/teachers', requireAdmin, async (req, res) => {
 
     // Generate time slots based on system
     const timeSlots = generateTimeSlots(teacherSystem);
-    
-    // Create slots for the teacher
-    // Default date can be set later by admin
-    const currentDate = new Date();
-    const dateString = currentDate.toLocaleDateString('de-DE');
-    
+
+    // Use event date from settings, fallback to today (ISO YYYY-MM-DD)
+    let eventDate = new Date().toISOString().split('T')[0];
+    try {
+      const { data: settings } = await supabase
+        .from('settings')
+        .select('*')
+        .limit(1)
+        .single();
+      if (settings && settings.event_date) {
+        eventDate = settings.event_date;
+      }
+    } catch {}
+
     const slotsToInsert = timeSlots.map(time => ({
       teacher_id: teacher.id,
       time: time,
-      date: dateString,
+      date: eventDate,
       booked: false
     }));
 
@@ -480,7 +489,40 @@ app.post('/api/admin/teachers', requireAdmin, async (req, res) => {
       // Don't fail the teacher creation if slots fail
     }
 
-    res.json({ success: true, teacher, slotsCreated: timeSlots.length });
+    // Create or upsert a linked user account for the teacher
+    // Use provided username/password if present; otherwise generate
+    const baseUsername = String(reqUsername || teacher.name || `teacher${teacher.id}`)
+      .toLowerCase()
+      .replace(/ä/g, 'ae')
+      .replace(/ö/g, 'oe')
+      .replace(/ü/g, 'ue')
+      .replace(/ß/g, 'ss')
+      .replace(/[^a-z0-9]+/g, '')
+      .slice(0, 20) || `teacher${teacher.id}`;
+
+    // Ensure uniqueness by appending id if needed
+    const username = `${baseUsername}${baseUsername.endsWith(String(teacher.id)) ? '' : teacher.id}`;
+    const providedPw = reqPassword && typeof reqPassword === 'string' ? reqPassword.trim() : '';
+    const isStrongEnough = providedPw.length >= 8;
+    const tempPassword = isStrongEnough
+      ? providedPw
+      : crypto.randomBytes(6).toString('base64url');
+    const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+    try {
+      await supabase
+        .from('users')
+        .upsert({
+          username,
+          password_hash: passwordHash,
+          role: 'teacher',
+          teacher_id: teacher.id
+        }, { onConflict: 'username' });
+    } catch (userErr) {
+      console.warn('User creation for teacher failed:', userErr?.message || userErr);
+    }
+
+    res.json({ success: true, teacher, slotsCreated: timeSlots.length, user: { username, tempPassword } });
   } catch (error) {
     console.error('Error creating teacher:', error);
     res.status(500).json({ error: 'Failed to create teacher' });
@@ -531,6 +573,43 @@ app.put('/api/admin/teachers/:id', requireAdmin, async (req, res) => {
   } catch (error) {
     console.error('Error updating teacher:', error);
     res.status(500).json({ error: 'Failed to update teacher' });
+  }
+});
+
+// PUT /api/admin/teachers/:id/reset-login - Regenerate teacher user's temp password
+app.put('/api/admin/teachers/:id/reset-login', requireAdmin, async (req, res) => {
+  const teacherId = parseInt(req.params.id, 10);
+  if (isNaN(teacherId)) {
+    return res.status(400).json({ error: 'Invalid teacher ID' });
+  }
+
+  try {
+    // Find user for this teacher
+    const { data: users, error: userErr } = await supabase
+      .from('users')
+      .select('*')
+      .eq('teacher_id', teacherId)
+      .limit(1);
+    if (userErr) throw userErr;
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({ error: 'Kein Benutzer für diese Lehrkraft gefunden' });
+    }
+
+    const user = users[0];
+    const tempPassword = crypto.randomBytes(6).toString('base64url');
+    const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+    const { error: upErr } = await supabase
+      .from('users')
+      .update({ password_hash: passwordHash })
+      .eq('id', user.id);
+    if (upErr) throw upErr;
+
+    res.json({ success: true, user: { username: user.username, tempPassword } });
+  } catch (error) {
+    console.error('Error resetting teacher login:', error);
+    res.status(500).json({ error: 'Failed to reset teacher login' });
   }
 });
 

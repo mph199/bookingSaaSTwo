@@ -18,14 +18,11 @@ export function AdminDashboard() {
     try {
       setLoading(true);
       setError('');
-      const data = await api.admin.getBookings();
-      
-      // Filter bookings for teachers - only show their own
-      const filteredData = user?.role === 'teacher' && user?.teacherId
-        ? data.filter(booking => booking.teacherId === user.teacherId)
-        : data;
-      
-      setBookings(filteredData);
+      // Use appropriate endpoint per role
+      const data = user?.role === 'teacher'
+        ? await api.teacher.getBookings()
+        : await api.admin.getBookings();
+      setBookings(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Laden der Buchungen');
     } finally {

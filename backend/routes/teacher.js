@@ -2,6 +2,7 @@ import express from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { supabase } from '../config/supabase.js';
 import { isEmailConfigured, sendMail } from '../config/email.js';
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
@@ -272,6 +273,49 @@ Bis bald!`;
   } catch (error) {
     console.error('Error accepting booking:', error);
     res.status(500).json({ error: 'Failed to accept booking' });
+  }
+});
+
+/**
+ * PUT /api/teacher/password
+ * Body: { currentPassword, newPassword }
+ * Allows logged-in teacher to change their own password
+ */
+router.put('/password', requireAuth, requireTeacher, async (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (!newPassword || typeof newPassword !== 'string' || newPassword.trim().length < 8) {
+    return res.status(400).json({ error: 'Neues Passwort muss mindestens 8 Zeichen haben' });
+  }
+  try {
+    // Find user by username from token
+    const username = req.user.username;
+    const { data: users, error: userErr } = await supabase
+      .from('users')
+      .select('*')
+      .eq('username', username)
+      .limit(1);
+    if (userErr) throw userErr;
+    if (!users || users.length === 0) {
+      return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+    const user = users[0];
+
+    // Verify current password if provided; require for safety
+    if (!currentPassword || !(await bcrypt.compare(currentPassword, user.password_hash || ''))) {
+      return res.status(401).json({ error: 'Aktuelles Passwort ist falsch' });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword.trim(), 10);
+    const { error: upErr } = await supabase
+      .from('users')
+      .update({ password_hash: passwordHash })
+      .eq('id', user.id);
+    if (upErr) throw upErr;
+
+    res.json({ success: true, message: 'Passwort erfolgreich geändert' });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ error: 'Fehler beim Ändern des Passworts' });
   }
 });
 
