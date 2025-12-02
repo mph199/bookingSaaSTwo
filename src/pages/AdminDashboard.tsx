@@ -124,15 +124,20 @@ export function AdminDashboard() {
               {user?.role === 'teacher' ? 'Meine gebuchten Termine' : 'Gebuchte Termine'}
             </div>
           </div>
-          {bookings.length > 0 && (
+          <div className="tooltip-container" style={{ marginLeft: '1rem' }}>
             <button
               onClick={() => exportBookingsToICal(bookings)}
               className="btn-primary"
-              style={{ marginLeft: '1rem' }}
+              disabled={bookings.length === 0}
             >
               📅 Alle Termine in den Kalender exportieren
             </button>
-          )}
+            <span className="tooltip">
+              {bookings.length === 0
+                ? 'Keine Buchungen zum Exportieren'
+                : 'Exportiert alle Termine als .ics Kalenderdatei'}
+            </span>
+          </div>
         </div>
 
         {error && (
