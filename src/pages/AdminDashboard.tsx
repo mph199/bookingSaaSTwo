@@ -160,6 +160,7 @@ export function AdminDashboard() {
                   <th>Zeit</th>
                   <th>Typ</th>
                   <th>Besucher</th>
+                  <th>Vertreter*in</th>
                   <th>Schüler/Azubi</th>
                   <th>Klasse</th>
                   <th>E-Mail</th>
@@ -178,6 +179,9 @@ export function AdminDashboard() {
                       {booking.visitorType === 'parent' 
                         ? booking.parentName 
                         : booking.companyName}
+                    </td>
+                    <td>
+                      {booking.visitorType === 'company' ? (booking.representativeName || '-') : '-'}
                     </td>
                     <td>
                       {booking.visitorType === 'parent' 

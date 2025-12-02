@@ -17,6 +17,7 @@ export interface TimeSlot {
   companyName?: string;
   studentName?: string;
   traineeName?: string;
+  representativeName?: string;
   className?: string;
   email?: string;
   message?: string;
@@ -28,6 +29,7 @@ export interface BookingFormData {
   companyName?: string;
   studentName?: string;
   traineeName?: string;
+  representativeName?: string;
   className: string;
   email: string;
   message?: string;

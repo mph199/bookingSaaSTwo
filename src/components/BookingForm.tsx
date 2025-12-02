@@ -21,6 +21,7 @@ export const BookingForm = ({
     companyName: '',
     studentName: '',
     traineeName: '',
+    representativeName: '',
     className: '',
     email: '',
     message: '',
@@ -35,7 +36,7 @@ export const BookingForm = ({
         return;
       }
     } else {
-      if (!formData.companyName || !formData.traineeName || !formData.className || !formData.email) {
+      if (!formData.companyName || !formData.traineeName || !formData.representativeName || !formData.className || !formData.email) {
         return;
       }
     }
@@ -49,6 +50,7 @@ export const BookingForm = ({
       companyName: '',
       studentName: '',
       traineeName: '',
+      representativeName: '',
       className: '',
       email: '',
       message: '',
@@ -62,6 +64,7 @@ export const BookingForm = ({
       companyName: '',
       studentName: '',
       traineeName: '',
+      representativeName: '',
       className: '',
       email: '',
       message: '',
@@ -148,6 +151,20 @@ export const BookingForm = ({
                   setFormData({ ...formData, traineeName: e.target.value })
                 }
                 placeholder="z.B. Max Mustermann"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="representativeName">Vertreter*in des Ausbildungsbetriebs</label>
+              <input
+                type="text"
+                id="representativeName"
+                value={formData.representativeName || ''}
+                onChange={(e) =>
+                  setFormData({ ...formData, representativeName: e.target.value })
+                }
+                placeholder="z.B. Frau/Herr Beispiel"
                 required
               />
             </div>

@@ -4,52 +4,45 @@ import type { TimeSlot as ApiSlot, TimeSlot as ApiBooking, Settings as ApiSettin
  * Generiert eine iCal (.ics) Datei für Kalender-Export
  */
 
-function formatICalDate(dateStr: string, timeStr: string): string {
-  // Parse date (YYYY-MM-DD) and time (HH:MM - HH:MM)
-  const [startTime] = timeStr.split(' - ');
-  const [hours, minutes] = startTime.split(':');
-  
-  // Create date object in local time
-  const date = new Date(dateStr);
-  date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-  
-  // Format as iCal date (YYYYMMDDTHHMMSS)
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hour = String(date.getHours()).padStart(2, '0');
-  const minute = String(date.getMinutes()).padStart(2, '0');
-  
-  return `${year}${month}${day}T${hour}${minute}00`;
+function formatICalDateLocal(dateStr: string, timeStr: string): string {
+  if (!dateStr || !timeStr) throw new Error('Invalid date/time for ICS');
+  const parts = timeStr.split(' - ');
+  if (!parts[0]) throw new Error('Invalid start time for ICS');
+  const [hoursStr, minutesStr] = parts[0].split(':');
+  const hours = Number(hoursStr);
+  const minutes = Number(minutesStr);
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) throw new Error('NaN time values');
+
+  const date = new Date(`${dateStr}T00:00:00`);
+  if (Number.isNaN(date.getTime())) throw new Error('Invalid date value');
+  date.setHours(hours, minutes, 0, 0);
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
 }
 
-function getEndTime(dateStr: string, timeStr: string): string {
-  // Parse end time from "HH:MM - HH:MM" format
-  const [, endTime] = timeStr.split(' - ');
-  const [hours, minutes] = endTime.split(':');
-  
-  const date = new Date(dateStr);
-  date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-  
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hour = String(date.getHours()).padStart(2, '0');
-  const minute = String(date.getMinutes()).padStart(2, '0');
-  
-  return `${year}${month}${day}T${hour}${minute}00`;
+function getEndTimeLocal(dateStr: string, timeStr: string): string {
+  if (!dateStr || !timeStr) throw new Error('Invalid date/time for ICS');
+  const parts = timeStr.split(' - ');
+  if (!parts[1]) throw new Error('Invalid end time for ICS');
+  const [hoursStr, minutesStr] = parts[1].split(':');
+  const hours = Number(hoursStr);
+  const minutes = Number(minutesStr);
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) throw new Error('NaN time values');
+
+  const date = new Date(`${dateStr}T00:00:00`);
+  if (Number.isNaN(date.getTime())) throw new Error('Invalid date value');
+  date.setHours(hours, minutes, 0, 0);
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
 }
 
 function getCurrentTimestamp(): string {
+  // DTSTAMP should be UTC
   const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hour = String(now.getHours()).padStart(2, '0');
-  const minute = String(now.getMinutes()).padStart(2, '0');
-  const second = String(now.getSeconds()).padStart(2, '0');
-  
-  return `${year}${month}${day}T${hour}${minute}${second}Z`;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
 }
 
 /**
@@ -60,8 +53,8 @@ export function exportSlotToICal(
   teacherName: string,
   settings?: ApiSettings
 ): void {
-  const startDate = formatICalDate(slot.date, slot.time);
-  const endDate = getEndTime(slot.date, slot.time);
+  const startDate = formatICalDateLocal(slot.date, slot.time);
+  const endDate = getEndTimeLocal(slot.date, slot.time);
   const timestamp = getCurrentTimestamp();
   const eventName = settings?.event_name || 'BKSB Elternsprechtag';
   
@@ -71,11 +64,29 @@ export function exportSlotToICal(
     'PRODID:-//BKSB Elternsprechtag//DE',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
+    'BEGIN:VTIMEZONE',
+    'TZID:Europe/Berlin',
+    'X-LIC-LOCATION:Europe/Berlin',
+    'BEGIN:DAYLIGHT',
+    'TZOFFSETFROM:+0100',
+    'TZOFFSETTO:+0200',
+    'TZNAME:CEST',
+    'DTSTART:19700329T020000',
+    'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
+    'END:DAYLIGHT',
+    'BEGIN:STANDARD',
+    'TZOFFSETFROM:+0200',
+    'TZOFFSETTO:+0100',
+    'TZNAME:CET',
+    'DTSTART:19701025T030000',
+    'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+    'END:STANDARD',
+    'END:VTIMEZONE',
     'BEGIN:VEVENT',
     `UID:slot-${slot.id}@bksb-elternsprechtag.de`,
     `DTSTAMP:${timestamp}`,
-    `DTSTART:${startDate}`,
-    `DTEND:${endDate}`,
+    `DTSTART;TZID=Europe/Berlin:${startDate}`,
+    `DTEND;TZID=Europe/Berlin:${endDate}`,
     `SUMMARY:${eventName} - ${teacherName}`,
     `DESCRIPTION:Elterngespräch mit ${teacherName}\\nSchüler/in: ${slot.studentName}\\nKlasse: ${slot.className}`,
     `LOCATION:BKSB`,
@@ -87,7 +98,8 @@ export function exportSlotToICal(
     'DESCRIPTION:Erinnerung: Elternsprechtag in 15 Minuten',
     'END:VALARM',
     'END:VEVENT',
-    'END:VCALENDAR'
+    'END:VCALENDAR',
+    ''
   ].join('\r\n');
 
   downloadICalFile(icalContent, `Elternsprechtag-${teacherName}-${slot.time.replace(/[: ]/g, '')}.ics`);
@@ -104,15 +116,15 @@ export function exportBookingsToICal(
   const eventName = settings?.event_name || 'BKSB Elternsprechtag';
   
   const events = bookings.map(booking => {
-    const startDate = formatICalDate(booking.date, booking.time);
-    const endDate = getEndTime(booking.date, booking.time);
+    const startDate = formatICalDateLocal(booking.date, booking.time);
+    const endDate = getEndTimeLocal(booking.date, booking.time);
     
     return [
       'BEGIN:VEVENT',
       `UID:booking-${booking.id}@bksb-elternsprechtag.de`,
       `DTSTAMP:${timestamp}`,
-      `DTSTART:${startDate}`,
-      `DTEND:${endDate}`,
+      `DTSTART;TZID=Europe/Berlin:${startDate}`,
+      `DTEND;TZID=Europe/Berlin:${endDate}`,
       `SUMMARY:${booking.teacherName} - ${booking.parentName}`,
       `DESCRIPTION:Schüler/in: ${booking.studentName}\\nKlasse: ${booking.className}\\nEltern: ${booking.parentName}`,
       `LOCATION:BKSB`,
@@ -128,10 +140,29 @@ export function exportBookingsToICal(
     'PRODID:-//BKSB Elternsprechtag//DE',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
+    'BEGIN:VTIMEZONE',
+    'TZID:Europe/Berlin',
+    'X-LIC-LOCATION:Europe/Berlin',
+    'BEGIN:DAYLIGHT',
+    'TZOFFSETFROM:+0100',
+    'TZOFFSETTO:+0200',
+    'TZNAME:CEST',
+    'DTSTART:19700329T020000',
+    'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
+    'END:DAYLIGHT',
+    'BEGIN:STANDARD',
+    'TZOFFSETFROM:+0200',
+    'TZOFFSETTO:+0100',
+    'TZNAME:CET',
+    'DTSTART:19701025T030000',
+    'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+    'END:STANDARD',
+    'END:VTIMEZONE',
     `X-WR-CALNAME:${eventName} - Alle Buchungen`,
     `X-WR-CALDESC:Übersicht aller Termine für ${eventName}`,
     events,
-    'END:VCALENDAR'
+    'END:VCALENDAR',
+    ''
   ].join('\r\n');
 
   const dateStr = settings?.event_date ? new Date(settings.event_date).toISOString().split('T')[0] : 'termine';
@@ -156,15 +187,15 @@ export function exportTeacherSlotsToICal(
   }
   
   const events = bookedSlots.map(slot => {
-    const startDate = formatICalDate(slot.date, slot.time);
-    const endDate = getEndTime(slot.date, slot.time);
+    const startDate = formatICalDateLocal(slot.date, slot.time);
+    const endDate = getEndTimeLocal(slot.date, slot.time);
     
     return [
       'BEGIN:VEVENT',
       `UID:teacher-slot-${slot.id}@bksb-elternsprechtag.de`,
       `DTSTAMP:${timestamp}`,
-      `DTSTART:${startDate}`,
-      `DTEND:${endDate}`,
+      `DTSTART;TZID=Europe/Berlin:${startDate}`,
+      `DTEND;TZID=Europe/Berlin:${endDate}`,
       `SUMMARY:${eventName} - ${slot.parentName}`,
       `DESCRIPTION:Schüler/in: ${slot.studentName}\\nKlasse: ${slot.className}\\nEltern: ${slot.parentName}`,
       `LOCATION:BKSB`,
@@ -180,10 +211,29 @@ export function exportTeacherSlotsToICal(
     'PRODID:-//BKSB Elternsprechtag//DE',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
+    'BEGIN:VTIMEZONE',
+    'TZID:Europe/Berlin',
+    'X-LIC-LOCATION:Europe/Berlin',
+    'BEGIN:DAYLIGHT',
+    'TZOFFSETFROM:+0100',
+    'TZOFFSETTO:+0200',
+    'TZNAME:CEST',
+    'DTSTART:19700329T020000',
+    'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
+    'END:DAYLIGHT',
+    'BEGIN:STANDARD',
+    'TZOFFSETFROM:+0200',
+    'TZOFFSETTO:+0100',
+    'TZNAME:CET',
+    'DTSTART:19701025T030000',
+    'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+    'END:STANDARD',
+    'END:VTIMEZONE',
     `X-WR-CALNAME:${eventName} - ${teacherName}`,
     `X-WR-CALDESC:Termine für ${teacherName}`,
     events,
-    'END:VCALENDAR'
+    'END:VCALENDAR',
+    ''
   ].join('\r\n');
 
   downloadICalFile(icalContent, `Elternsprechtag-${teacherName}.ics`);

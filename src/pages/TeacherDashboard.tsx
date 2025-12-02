@@ -233,7 +233,14 @@ export function TeacherDashboard() {
                       <td>
                         {booking.visitorType === 'parent' 
                           ? booking.parentName 
-                          : booking.companyName}
+                          : (
+                            <div>
+                              <div>{booking.companyName}</div>
+                              {booking.representativeName && (
+                                <small>Vertreter*in: {booking.representativeName}</small>
+                              )}
+                            </div>
+                          )}
                       </td>
                       <td>
                         {booking.visitorType === 'parent' 

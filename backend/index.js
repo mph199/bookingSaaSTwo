@@ -104,6 +104,7 @@ app.get('/api/slots', async (req, res) => {
       companyName: slot.company_name,
       studentName: slot.student_name,
       traineeName: slot.trainee_name,
+      representativeName: slot.representative_name,
       className: slot.class_name,
       email: slot.email,
       message: slot.message
@@ -120,7 +121,7 @@ app.get('/api/slots', async (req, res) => {
 // Body: { slotId, visitorType, parentName, companyName, studentName, traineeName, className, email, message }
 app.post('/api/bookings', async (req, res) => {
   try {
-    const { slotId, visitorType, parentName, companyName, studentName, traineeName, className, email, message } = req.body || {};
+    const { slotId, visitorType, parentName, companyName, studentName, traineeName, representativeName, className, email, message } = req.body || {};
 
     if (!slotId || !visitorType || !className || !email) {
       return res.status(400).json({ error: 'slotId, visitorType, className, email required' });
@@ -132,8 +133,8 @@ app.post('/api/bookings', async (req, res) => {
         return res.status(400).json({ error: 'parentName and studentName required for parent type' });
       }
     } else if (visitorType === 'company') {
-      if (!companyName || !traineeName) {
-        return res.status(400).json({ error: 'companyName and traineeName required for company type' });
+      if (!companyName || !traineeName || !representativeName) {
+        return res.status(400).json({ error: 'companyName, traineeName and representativeName required for company type' });
       }
     } else {
       return res.status(400).json({ error: 'visitorType must be parent or company' });
@@ -154,6 +155,7 @@ app.post('/api/bookings', async (req, res) => {
     } else {
       updateData.company_name = companyName;
       updateData.trainee_name = traineeName;
+      updateData.representative_name = representativeName;
     }
 
     // Prepare verification token
@@ -229,6 +231,7 @@ Vielen Dank!`;
       companyName: data.company_name,
       studentName: data.student_name,
       traineeName: data.trainee_name,
+      representativeName: data.representative_name,
       className: data.class_name,
       email: data.email,
       message: data.message

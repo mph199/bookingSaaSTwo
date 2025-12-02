@@ -231,7 +231,6 @@ export function AdminSlots() {
           </div>
         ) : (
           <>
-            <Breadcrumbs />
             {selectedTeacher && (
               <div className="settings-info" style={{ marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -266,6 +265,7 @@ export function AdminSlots() {
                       <th>Datum</th>
                       <th>Status</th>
                       <th>Gebucht von</th>
+                      <th>Vertreter*in</th>
                       <th>Aktionen</th>
                     </tr>
                   </thead>
@@ -283,12 +283,24 @@ export function AdminSlots() {
                         <td>
                           {slot.booked ? (
                             <div>
-                              <div>{slot.parentName}</div>
-                              <small>{slot.studentName} ({slot.className})</small>
+                              {slot.visitorType === 'parent' ? (
+                                <>
+                                  <div>{slot.parentName}</div>
+                                  <small>{slot.studentName} ({slot.className})</small>
+                                </>
+                              ) : (
+                                <>
+                                  <div>{slot.companyName}</div>
+                                  <small>{slot.traineeName} ({slot.className})</small>
+                                </>
+                              )}
                             </div>
                           ) : (
                             '-'
                           )}
+                        </td>
+                        <td>
+                          {slot.booked && slot.visitorType === 'company' ? (slot.representativeName || '-') : '-'}
                         </td>
                         <td>
                           <div className="action-buttons">

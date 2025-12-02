@@ -582,3 +582,19 @@
     min-width: 0;
   }
 }
+
+/* Additional mobile refinements */
+@media (max-width: 768px) {
+  .breadcrumbs { flex-wrap: wrap; }
+  .action-buttons { flex-wrap: wrap; }
+  .bookings-table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .bookings-table { min-width: 720px; }
+  .bookings-table th, .bookings-table td { padding: 0.6rem 0.75rem; font-size: 0.92rem; }
+  .action-buttons .btn-primary, .action-buttons .edit-button, .action-buttons .cancel-button { padding: 0.5rem 0.75rem; font-size: 0.9rem; }
+}
+
+@media (max-width: 480px) {
+  .admin-header h1 { font-size: 1.35rem; }
+  .breadcrumbs { font-size: 0.85rem; padding: 0.3rem 0.5rem; }
+  .back-button, .logout-button, .btn-primary, .btn-secondary { font-size: 0.9rem; padding: 0.55rem 0.9rem; }
+}
