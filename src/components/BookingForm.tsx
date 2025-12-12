@@ -214,7 +214,7 @@ export const BookingForm = ({
 
         <div className="form-actions">
           <button type="submit" className="btn btn-primary">
-            Termin buchen
+            Buchungsanfrage senden
           </button>
           <button
             type="button"

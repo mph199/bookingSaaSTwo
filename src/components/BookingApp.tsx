@@ -14,10 +14,12 @@ export const BookingApp = () => {
   const [selectedTeacherId, setSelectedTeacherId] = useState<number | null>(null);
   const [teacherSearch, setTeacherSearch] = useState<string>('');
   
+  
   const {
     slots,
     selectedSlotId,
     message,
+    bookingNoticeOpen,
     loading: slotsLoading,
     error: slotsError,
     handleSelectSlot,
@@ -58,6 +60,24 @@ export const BookingApp = () => {
 
   return (
     <div className="booking-app">
+      {bookingNoticeOpen && (
+        <div className="booking-notice-overlay" role="dialog" aria-modal="true" aria-label="Hinweis zur E-Mail-Bestätigung">
+          <div className="booking-notice">
+            <h3>Fast fertig</h3>
+            <p>
+              Danke für Ihre Buchungsanfrage!
+            </p>
+            <p>
+              <span className="booking-notice-important">Wichtig:</span>{' '}
+              Die Lehrkraft kann den Termin erst bestätigen, nachdem Sie Ihre E-Mail-Adresse bestätigt haben.
+              Bitte prüfen Sie Ihr Postfach (ggf. Spam) und klicken Sie auf den Bestätigungslink.
+            </p>
+            <button type="button" className="btn btn-primary" onClick={resetSelection}>
+              Verstanden
+            </button>
+          </div>
+        </div>
+      )}
       <header className="app-header">
         <div className="header-inner">
           <div className="header-content">

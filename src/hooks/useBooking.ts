@@ -6,6 +6,7 @@ export const useBooking = (selectedTeacherId: number | null) => {
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
   const [message, setMessage] = useState<string>('');
+  const [bookingNoticeOpen, setBookingNoticeOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
 
@@ -36,6 +37,7 @@ export const useBooking = (selectedTeacherId: number | null) => {
   const handleSelectSlot = useCallback((slotId: number) => {
     setSelectedSlotId(slotId);
     setMessage('');
+    setBookingNoticeOpen(false);
   }, []);
 
   const handleBooking = useCallback(async (formData: BookingFormData) => {
@@ -56,7 +58,8 @@ export const useBooking = (selectedTeacherId: number | null) => {
             slot.id === selectedSlotId ? response.updatedSlot! : slot
           )
         );
-        setMessage('Termin reserviert – bitte prüfen Sie Ihre E-Mail und bestätigen Sie den Link. Nach Bestätigung erhalten Sie die endgültige Zusage, sobald die Lehrkraft den Termin annimmt.');
+        setMessage('Danke für Ihre Buchungsanfrage!');
+        setBookingNoticeOpen(true);
         setSelectedSlotId(null);
       } else {
         setMessage(response.message || 'Buchung fehlgeschlagen');
@@ -73,12 +76,14 @@ export const useBooking = (selectedTeacherId: number | null) => {
   const resetSelection = useCallback(() => {
     setSelectedSlotId(null);
     setMessage('');
+    setBookingNoticeOpen(false);
   }, []);
 
   return {
     slots,
     selectedSlotId,
     message,
+    bookingNoticeOpen,
     loading,
     error,
     handleSelectSlot,
