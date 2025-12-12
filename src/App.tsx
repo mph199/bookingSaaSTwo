@@ -5,7 +5,6 @@ import { BookingApp } from './components/BookingApp'
 import { LoginPage } from './pages/LoginPage';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { AdminTeachers } from './pages/AdminTeachers';
-import { AdminSettings } from './pages/AdminSettings';
 import { AdminSlots } from './pages/AdminSlots';
 import { AdminEvents } from './pages/AdminEvents';
 import { TeacherDashboard } from './pages/TeacherDashboard';
@@ -69,14 +68,6 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AdminSlots />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/admin/settings" 
-                element={
-                  <ProtectedRoute>
-                    <AdminSettings />
                   </ProtectedRoute>
                 } 
               />

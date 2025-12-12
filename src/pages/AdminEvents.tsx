@@ -246,7 +246,7 @@ export function AdminEvents() {
         {error && <div className="admin-error">{error}</div>}
         {success && <div className="admin-success">{success}</div>}
 
-        <div className="teacher-form-container" style={{ marginBottom: 24 }}>
+        <div className="teacher-form-container">
           <h3>Neues Event anlegen</h3>
           <form onSubmit={handleCreate} className="teacher-form">
             <div className="form-group">
@@ -332,7 +332,7 @@ export function AdminEvents() {
           </form>
         </div>
 
-        <div className="teacher-form-container" style={{ marginBottom: 24 }}>
+        <div className="teacher-form-container">
           <h3>Event auswählen & Slots generieren</h3>
           <div className="form-group">
             <label htmlFor="ev_select">Event</label>
@@ -406,7 +406,7 @@ export function AdminEvents() {
         </div>
 
         <div className="bookings-table-container">
-          <div className="admin-section-header" style={{ marginTop: 28 }}>
+          <div className="admin-section-header">
             <h3>Alle Events</h3>
           </div>
           {events.length === 0 ? (
@@ -456,7 +456,7 @@ export function AdminEvents() {
           )}
         </div>
 
-        <div className="settings-info" style={{ marginTop: 18 }}>
+        <div className="settings-info">
           <p className="text-muted">
             Hinweis: „Aktiv“ ist das zuletzt veröffentlichte Event, das innerhalb seines Buchungsfensters liegt.
           </p>

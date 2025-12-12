@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import api from '../services/api';
-import type { TimeSlot, Settings } from '../types';
+import type { TimeSlot } from '../types';
 import { exportBookingsToICal } from '../utils/icalExport';
 import './AdminDashboard.css';
 import { Breadcrumbs } from '../components/Breadcrumbs';
@@ -24,7 +24,6 @@ export function TeacherDashboard() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [teacher, setTeacher] = useState<TeacherInfo | null>(null);
-  const [settings, setSettings] = useState<Settings | null>(null);
   const [query, setQuery] = useState<string>('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'parent' | 'company'>('all');
   const { user, logout } = useAuth();
@@ -44,19 +43,17 @@ export function TeacherDashboard() {
   };
 
   useEffect(() => {
-    // Load bookings, teacher info, and settings in parallel
+    // Load bookings and teacher info in parallel
     (async () => {
       setLoading(true);
       setError('');
       try {
-        const [b, t, s] = await Promise.all([
+        const [b, t] = await Promise.all([
           api.teacher.getBookings(),
           api.teacher.getInfo().catch(() => null),
-          api.admin.getSettings().catch(() => null),
         ]);
         setBookings(b);
         if (t) setTeacher(t as TeacherInfo);
-        if (s) setSettings(s as Settings);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Fehler beim Laden');
       } finally {
@@ -150,7 +147,7 @@ export function TeacherDashboard() {
     }
     exportBookingsToICal(
       filtered.map((b) => ({ ...b, teacherName: teacher?.name || 'Lehrkraft' })),
-      settings || undefined
+      undefined
     );
   };
 

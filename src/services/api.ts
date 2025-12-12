@@ -127,16 +127,6 @@ const api = {
     async deleteTeacher(id: number) {
       return requestJSON(`/admin/teachers/${id}`, { method: 'DELETE', auth: true });
     },
-    async getSettings() {
-      return requestJSON('/admin/settings', { auth: true });
-    },
-    async updateSettings(payload: any) {
-      return requestJSON('/admin/settings', {
-        method: 'PUT',
-        auth: true,
-        body: JSON.stringify(payload),
-      });
-    },
     async getSlots() {
       return requestJSON('/admin/slots', { auth: true });
     },

@@ -7,7 +7,6 @@ const labelMap: Record<string, string> = {
   '/admin': 'Admin',
   '/admin/teachers': 'Lehrkräfte',
   '/admin/slots': 'Slots',
-  '/admin/settings': 'Einstellungen',
   '/admin/events': 'Elternsprechtage',
   '/impressum': 'Impressum',
   '/datenschutz': 'Datenschutz',

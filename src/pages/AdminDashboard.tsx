@@ -95,16 +95,6 @@ export function AdminDashboard() {
               </div>
             </button>
             <button 
-              onClick={() => navigate('/admin/settings')} 
-              className="admin-action-button"
-            >
-              <span className="action-icon">⚙️</span>
-              <div>
-                <div className="action-title">Einstellungen</div>
-                <div className="action-desc">Allgemeine Einstellungen</div>
-              </div>
-            </button>
-            <button 
               onClick={() => navigate('/admin/events')} 
               className="admin-action-button"
             >

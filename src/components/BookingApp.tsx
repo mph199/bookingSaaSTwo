@@ -152,6 +152,18 @@ export const BookingApp = () => {
                 Willkommen im Buchungssystem des BKSB für Termine am Eltern- und
                 Ausbildersprechtag.
               </p>
+
+              {(eventLoading || eventError || !activeEvent) && (
+                <div className={`header-notice${eventError ? ' header-notice-error' : ''}`} role="status">
+                  {eventLoading ? (
+                    'Lade Elternsprechtag…'
+                  ) : eventError ? (
+                    eventError
+                  ) : (
+                    'Buchungen sind aktuell noch nicht freigeschaltet.'
+                  )}
+                </div>
+              )}
             </div>
             <a href="/login" className="admin-button">
               Login
@@ -159,18 +171,6 @@ export const BookingApp = () => {
           </div>
         </div>
       </header>
-
-      {(eventLoading || eventError || !activeEvent) && (
-        <div className={`event-banner${eventError ? ' event-banner-error' : ''}`}>
-          {eventLoading ? (
-            <p>Lade Elternsprechtag…</p>
-          ) : eventError ? (
-            <p>{eventError}</p>
-          ) : (
-            <p>Buchungen sind aktuell noch nicht freigeschaltet.</p>
-          )}
-        </div>
-      )}
 
       <div className="app-content">
         <aside className="sidebar">
