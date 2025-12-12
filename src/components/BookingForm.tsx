@@ -112,7 +112,7 @@ export const BookingForm = ({
             </div>
 
             <div className="form-group">
-              <label htmlFor="studentName">Name des Schülers/der Schülerin</label>
+              <label htmlFor="studentName">Name der Schüler*in</label>
               <input
                 type="text"
                 id="studentName"
@@ -142,7 +142,7 @@ export const BookingForm = ({
             </div>
 
             <div className="form-group">
-              <label htmlFor="traineeName">Name des Auszubildenden</label>
+              <label htmlFor="traineeName">Name des*der Auszubildenden</label>
               <input
                 type="text"
                 id="traineeName"

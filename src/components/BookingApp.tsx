@@ -150,7 +150,7 @@ export const BookingApp = () => {
               )}
               <p>
                 Willkommen im Buchungssystem des BKSB für Termine am Eltern- und
-                Ausbildersprechtag.
+                Ausbildungsbetriebssprechtag.
               </p>
 
               {(eventLoading || eventError || !activeEvent) && (

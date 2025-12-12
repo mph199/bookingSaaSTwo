@@ -157,9 +157,9 @@ export function AdminDashboard() {
                   <th>Datum</th>
                   <th>Zeit</th>
                   <th>Typ</th>
-                  <th>Besucher</th>
+                  <th>Besuchende</th>
                   <th>Vertreter*in</th>
-                  <th>Schüler/Azubi</th>
+                  <th>Schüler*in/Azubi</th>
                   <th>Klasse</th>
                   <th>E-Mail</th>
                   <th>Aktionen</th>

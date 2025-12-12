@@ -241,8 +241,8 @@ export function TeacherDashboard() {
                 style={{ padding: 8 }}
               >
                 <option value="all">Alle</option>
-                <option value="parent">Eltern</option>
-                <option value="company">Ausbilder</option>
+                <option value="parent">Erziehungsberechtigte</option>
+                <option value="company">Ausbildungsbetrieb</option>
               </select>
             </div>
           </div>
@@ -285,7 +285,7 @@ export function TeacherDashboard() {
                     <th>Zeit</th>
                     <th>Typ</th>
                     <th>Name</th>
-                    <th>Schüler/Azubi</th>
+                    <th>Schüler*in/Azubi</th>
                     <th>Klasse</th>
                     <th>E-Mail</th>
                     <th>Nachricht</th>
@@ -299,9 +299,9 @@ export function TeacherDashboard() {
                       <td>{booking.time}</td>
                       <td>
                         {booking.visitorType === 'parent' ? (
-                          <span className="badge badge-parent">Eltern</span>
+                          <span className="badge badge-parent">Erziehungsberechtigte</span>
                         ) : (
-                          <span className="badge badge-company">Ausbilder</span>
+                          <span className="badge badge-company">Ausbildungsbetrieb</span>
                         )}
                       </td>
                       <td>
