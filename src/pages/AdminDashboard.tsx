@@ -117,14 +117,16 @@ export function AdminDashboard() {
           </div>
         )}
 
-        <div className="admin-stats">
-          <div className="stat-card">
-            <div className="stat-value">{bookings.length}</div>
-            <div className="stat-label">
-              {user?.role === 'teacher' ? 'Meine gebuchten Termine' : 'Gebuchte Termine'}
-            </div>
+        {/* Counter removed per request */}
+
+        {error && (
+          <div className="admin-error">
+            {error}
           </div>
-          <div className="tooltip-container" style={{ marginLeft: '1rem' }}>
+        )}
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.75rem 0 0.5rem 0' }}>
+          <div className="tooltip-container">
             <button
               onClick={() => exportBookingsToICal(bookings)}
               className="btn-primary"
@@ -139,12 +141,6 @@ export function AdminDashboard() {
             </span>
           </div>
         </div>
-
-        {error && (
-          <div className="admin-error">
-            {error}
-          </div>
-        )}
 
         {bookings.length === 0 ? (
           <div className="no-bookings">

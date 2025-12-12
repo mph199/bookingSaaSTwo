@@ -2,6 +2,7 @@ export function mapSlotRow(slot) {
   if (!slot) return null;
   return {
     id: slot.id,
+    eventId: slot.event_id ?? undefined,
     teacherId: slot.teacher_id,
     time: slot.time,
     date: slot.date,
@@ -24,7 +25,6 @@ export function mapBookingRowWithTeacher(slot) {
   if (!mapped) return null;
   return {
     ...mapped,
-      eventId: slot.event_id ?? undefined,
     teacherSubject: slot.teacher?.subject || 'Unknown',
   };
 }

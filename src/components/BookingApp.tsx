@@ -140,7 +140,7 @@ export const BookingApp = () => {
           <div className="header-content">
             <div className="header-text">
               <div className="brand">
-                <h1 className="brand-title">BKSB Navi</h1>
+                <h1 className="brand-title">BKSB Buchungssystem</h1>
                 <span className="subpage-badge">Elternsprechtag</span>
               </div>
               {formattedEventHeader ? (

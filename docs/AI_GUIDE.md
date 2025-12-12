@@ -66,7 +66,7 @@ Hinweis: Ein globaler Toast-Provider und ErrorBoundary sind aktuell nicht implem
   - `DELETE /api/teacher/bookings/:slotId` → `{ success: boolean }`
 
 ## UX-Patterns
-- Breadcrumb-Header: „BKSB Navi / Elternsprechtag“ (in `BookingApp`-Header/Breadcrumbs abbilden).
+- Breadcrumb-Header: „BKSB Buchungssystem / Elternsprechtag“ (in `BookingApp`-Header/Breadcrumbs abbilden).
 - Hinweise/Toasts:
   - Aktuell: Anzeigen über `useBooking().message` im UI.
   - Optional/Geplant: `showToast(text, type?, durationMs?)` – Typ: `success|error|info`. Standard 5s; sticky via `durationMs=0`.

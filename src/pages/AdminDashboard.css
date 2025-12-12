@@ -461,6 +461,13 @@
   gap: 1.25rem;
 }
 
+/* Simple admin grid helpers */
+.admin-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -533,6 +540,18 @@
   gap: 0.5rem;
 }
 
+/* Compact action buttons (e.g., AdminEvents table) */
+.action-buttons--compact {
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.btn-secondary--sm {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
+
 /* Ensure inline action buttons align nicely inside table cells */
 .edit-button,
 .cancel-button {
@@ -601,6 +620,19 @@
     gap: 1rem;
   }
 
+  .header-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .header-actions .back-button,
+  .header-actions .logout-button {
+    flex: 1;
+    min-width: 10.5rem;
+  }
+
   .admin-header h1 {
     font-size: 1.5rem;
   }
@@ -611,6 +643,15 @@
 
   .admin-main {
     padding: 1rem;
+  }
+
+  .admin-actions {
+    flex-direction: column;
+  }
+
+  .admin-action-button {
+    max-width: none;
+    width: 100%;
   }
 
   .stat-card {
@@ -627,10 +668,31 @@
   .bookings-table { min-width: 720px; }
   .bookings-table th, .bookings-table td { padding: 0.6rem 0.75rem; font-size: 0.92rem; }
   .action-buttons .btn-primary, .action-buttons .edit-button, .action-buttons .cancel-button { padding: 0.5rem 0.75rem; font-size: 0.9rem; }
+
+  .admin-grid-2 {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
   .admin-header h1 { font-size: 1.35rem; }
   .breadcrumbs { font-size: 0.85rem; padding: 0.3rem 0.5rem; }
   .back-button, .logout-button, .btn-primary, .btn-secondary { font-size: 0.9rem; padding: 0.55rem 0.9rem; }
+
+  .admin-header-content {
+    padding: 0.75rem 0.75rem 0.85rem;
+  }
+
+  .teacher-form-container {
+    padding: 1.25rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-actions > button {
+    width: 100%;
+  }
 }

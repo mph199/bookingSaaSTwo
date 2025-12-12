@@ -362,7 +362,7 @@ export function AdminEvents() {
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="admin-grid-2" style={{ marginBottom: 4 }}>
             <div className="form-group">
               <label htmlFor="slotMinutes">Slot-Länge (Min.)</label>
               <input
@@ -410,61 +410,61 @@ export function AdminEvents() {
           </div>
         </div>
 
-        <div className="bookings-table-container">
-          <div className="admin-section-header">
-            <h3>Alle Events</h3>
-          </div>
+        <div className="teacher-form-container">
+          <h3>Alle Events</h3>
           {events.length === 0 ? (
-            <div className="no-bookings" style={{ padding: '2.25rem' }}>
+            <div className="no-bookings" style={{ padding: '1.75rem' }}>
               <p style={{ marginBottom: '0.75rem' }}>Keine Events vorhanden.</p>
               <p style={{ color: '#6b7280', margin: 0 }}>
                 Lege oben ein Event an und setze es auf „Veröffentlicht“, um Buchungen freizuschalten.
               </p>
             </div>
           ) : (
-            <table className="bookings-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Schuljahr</th>
-                  <th>Start</th>
-                  <th>Ende</th>
-                  <th>Status</th>
-                  <th>Aktionen</th>
-                </tr>
-              </thead>
-              <tbody>
-                {events.map((ev) => (
-                  <tr key={ev.id} style={ev.id === selectedEventId ? { background: '#f4f7ff' } : undefined}>
-                    <td>#{ev.id}</td>
-                    <td>{ev.name}</td>
-                    <td>{ev.school_year}</td>
-                    <td>{formatEventDateTime(ev.starts_at)}</td>
-                    <td>{formatEventDateTime(ev.ends_at)}</td>
-                    <td>{ev.status}</td>
-                    <td>
-                      <div className="action-buttons" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        <button type="button" className="btn-secondary" onClick={() => setSelectedEventId(ev.id)}>
-                        Auswählen
-                        </button>
-                        {ev.status !== 'published' && (
-                          <button type="button" className="btn-secondary" onClick={() => handleSetStatus(ev.id, 'published')}>
-                            Veröffentlichen
-                          </button>
-                        )}
-                        <button type="button" className="btn-secondary" onClick={() => handleSetStatus(ev.id, 'draft')}>
-                          Entwurf
-                        </button>
-                        <button type="button" className="btn-secondary" onClick={() => handleDelete(ev.id)}>
-                          Löschen
-                        </button>
-                      </div>
-                    </td>
+            <div className="bookings-table-container" style={{ marginTop: '0.25rem' }}>
+              <table className="bookings-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Schuljahr</th>
+                    <th>Start</th>
+                    <th>Ende</th>
+                    <th>Status</th>
+                    <th>Aktionen</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {events.map((ev) => (
+                    <tr key={ev.id} style={ev.id === selectedEventId ? { background: '#f4f7ff' } : undefined}>
+                      <td>#{ev.id}</td>
+                      <td>{ev.name}</td>
+                      <td>{ev.school_year}</td>
+                      <td>{formatEventDateTime(ev.starts_at)}</td>
+                      <td>{formatEventDateTime(ev.ends_at)}</td>
+                      <td>{ev.status}</td>
+                      <td>
+                        <div className="action-buttons action-buttons--compact">
+                          <button type="button" className="btn-secondary btn-secondary--sm" onClick={() => setSelectedEventId(ev.id)}>
+                            Auswählen
+                          </button>
+                          {ev.status !== 'published' && (
+                            <button type="button" className="btn-secondary btn-secondary--sm" onClick={() => handleSetStatus(ev.id, 'published')}>
+                              Veröffentlichen
+                            </button>
+                          )}
+                          <button type="button" className="btn-secondary btn-secondary--sm" onClick={() => handleSetStatus(ev.id, 'draft')}>
+                            Entwurf
+                          </button>
+                          <button type="button" className="btn-secondary btn-secondary--sm" onClick={() => handleDelete(ev.id)}>
+                            Löschen
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
