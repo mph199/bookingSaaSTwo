@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import api from '../services/api';
 
 export function VerifyEmail() {
   const token = new URLSearchParams(window.location.search).get('token');
@@ -8,20 +9,14 @@ export function VerifyEmail() {
 
   useEffect(() => {
     if (!token) return;
-    fetch(`/api/bookings/verify/${token}`)
-      .then(async (r) => {
-        const data = await r.json();
-        if (r.ok) {
-          setStatus('ok');
-          setMessage(data.message || 'E-Mail bestätigt.');
-        } else {
-          setStatus('error');
-          setMessage(data.error || 'Verifikation fehlgeschlagen.');
-        }
+    api.bookings.verifyEmail(token)
+      .then((data: any) => {
+        setStatus('ok');
+        setMessage(data?.message || 'E-Mail bestätigt.');
       })
-      .catch(() => {
+      .catch((e: unknown) => {
         setStatus('error');
-        setMessage('Verifikation fehlgeschlagen.');
+        setMessage(e instanceof Error ? e.message : 'Verifikation fehlgeschlagen.');
       });
   }, [token]);
 

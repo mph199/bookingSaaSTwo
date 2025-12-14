@@ -16,8 +16,11 @@ import { Footer } from './components/Footer';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
 import './App.css'
 
-// Setze auf true um Maintenance-Modus zu aktivieren
-const MAINTENANCE_MODE = false;
+// Maintenance-Modus via Env: VITE_MAINTENANCE_MODE=true|1|yes
+const MAINTENANCE_MODE = (() => {
+  const raw = (import.meta as any).env?.VITE_MAINTENANCE_MODE;
+  return typeof raw === 'string' && /^(1|true|yes)$/i.test(raw);
+})();
 
 function App() {
   return (

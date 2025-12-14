@@ -56,6 +56,12 @@ const api = {
       return requestJSON('/events/active');
     },
   },
+  bookings: {
+    async verifyEmail(token: string) {
+      const safe = encodeURIComponent(String(token || ''));
+      return requestJSON(`/bookings/verify/${safe}`);
+    },
+  },
   async getTeachers() {
     const res = await requestJSON('/teachers');
     return (res && (res as any).teachers) || [];

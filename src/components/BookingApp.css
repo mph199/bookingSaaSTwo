@@ -255,6 +255,9 @@
 }
 
 .teacher-card {
+  border: none;
+  width: 100%;
+  text-align: left;
   padding: 1.1rem 1rem;
   border: 2px solid rgba(229, 231, 235, 0.6);
   border-radius: 14px;
@@ -264,6 +267,11 @@
   backdrop-filter: blur(8px);
   min-height: 48px; /* Touch-Target-Minimum */
   margin-bottom: 0.25rem; /* Zusätzlicher Abstand für Hover-Animation */
+}
+
+.teacher-card:focus-visible {
+  outline: 3px solid rgba(16, 185, 129, 0.35);
+  outline-offset: 3px;
 }
 
 .teacher-card:hover {
@@ -334,6 +342,9 @@
 }
 
 .slot-card {
+  border: none;
+  width: 100%;
+  text-align: left;
   padding: 0.75rem 0.8rem;
   border: 2px solid rgba(229, 231, 235, 0.6);
   border-radius: 12px;
@@ -345,6 +356,15 @@
   min-height: 48px; /* Touch-Target-Minimum */
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(4px);
+}
+
+.slot-card:disabled {
+  cursor: not-allowed;
+}
+
+.slot-card:focus-visible {
+  outline: 3px solid rgba(16, 185, 129, 0.35);
+  outline-offset: 3px;
 }
 
 .slot-card.available:hover {

@@ -340,24 +340,84 @@ app.post('/api/admin/teachers', requireAdmin, async (req, res) => {
     // Generate time slots based on system
     const timeSlots = generateTimeSlots(teacherSystem);
 
-    // Use event date from settings, fallback to today (ISO YYYY-MM-DD)
-    let eventDate = new Date().toISOString().split('T')[0];
-    try {
-      const { data: settings } = await supabase
-        .from('settings')
-        .select('*')
-        .limit(1)
-        .single();
-      if (settings && settings.event_date) {
-        eventDate = settings.event_date;
-      }
-    } catch {}
+    // Prefer: create slots for the currently active (published) event.
+    // Fallback: newest event (any status). Last resort: settings.event_date.
+    const formatDateDE = (isoOrDate) => {
+      const d = new Date(isoOrDate);
+      if (Number.isNaN(d.getTime())) return null;
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = String(d.getFullYear());
+      return `${dd}.${mm}.${yyyy}`;
+    };
 
+    let targetEventId = null;
+    let eventDate = null;
+
+    try {
+      const nowIso = new Date().toISOString();
+      const { data: activeEvents, error: activeErr } = await supabase
+        .from('events')
+        .select('id, starts_at')
+        .eq('status', 'published')
+        .or(`booking_opens_at.is.null,booking_opens_at.lte.${nowIso}`)
+        .or(`booking_closes_at.is.null,booking_closes_at.gte.${nowIso}`)
+        .order('starts_at', { ascending: false })
+        .limit(1);
+      if (activeErr) throw activeErr;
+      const activeEvent = activeEvents && activeEvents.length ? activeEvents[0] : null;
+      if (activeEvent?.id) {
+        targetEventId = activeEvent.id;
+        eventDate = formatDateDE(activeEvent.starts_at);
+      }
+    } catch (e) {
+      console.warn('Resolving active event for teacher slots failed:', e?.message || e);
+    }
+
+    if (!targetEventId || !eventDate) {
+      try {
+        const { data: latestEvents, error: latestErr } = await supabase
+          .from('events')
+          .select('id, starts_at')
+          .order('starts_at', { ascending: false })
+          .limit(1);
+        if (latestErr) throw latestErr;
+        const latest = latestEvents && latestEvents.length ? latestEvents[0] : null;
+        if (latest?.id) {
+          targetEventId = latest.id;
+          eventDate = formatDateDE(latest.starts_at);
+        }
+      } catch (e) {
+        console.warn('Resolving latest event for teacher slots failed:', e?.message || e);
+      }
+    }
+
+    if (!eventDate) {
+      // Settings fallback: stored as DATE (YYYY-MM-DD)
+      try {
+        const { data: settings } = await supabase
+          .from('settings')
+          .select('event_date')
+          .limit(1)
+          .single();
+        if (settings?.event_date) {
+          eventDate = formatDateDE(settings.event_date);
+        }
+      } catch {}
+    }
+
+    if (!eventDate) {
+      eventDate = formatDateDE(new Date().toISOString()) || '01.01.1970';
+    }
+
+    const now = new Date().toISOString();
     const slotsToInsert = timeSlots.map(time => ({
       teacher_id: teacher.id,
+      event_id: targetEventId,
       time: time,
       date: eventDate,
-      booked: false
+      booked: false,
+      updated_at: now,
     }));
 
     const { error: slotsError } = await supabase
@@ -402,7 +462,14 @@ app.post('/api/admin/teachers', requireAdmin, async (req, res) => {
       console.warn('User creation for teacher failed:', userErr?.message || userErr);
     }
 
-    res.json({ success: true, teacher, slotsCreated: timeSlots.length, user: { username, tempPassword } });
+    res.json({
+      success: true,
+      teacher,
+      slotsCreated: timeSlots.length,
+      slotsEventId: targetEventId,
+      slotsEventDate: eventDate,
+      user: { username, tempPassword }
+    });
   } catch (error) {
     console.error('Error creating teacher:', error);
     res.status(500).json({ error: 'Failed to create teacher' });

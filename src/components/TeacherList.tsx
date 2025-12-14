@@ -16,26 +16,20 @@ export const TeacherList = ({
       <h2>Lehrkräfte</h2>
       <div className="teachers-container" role="list">
         {teachers.map((teacher) => (
-          <div
+          <button
             key={teacher.id}
             className={`teacher-card ${
               selectedTeacherId === teacher.id ? 'selected' : ''
             }`}
+            type="button"
             onClick={() => onSelectTeacher(teacher.id)}
-            role="listitem button"
-            tabIndex={0}
-            aria-selected={selectedTeacherId === teacher.id}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onSelectTeacher(teacher.id);
-              }
-            }}
+            role="listitem"
+            aria-pressed={selectedTeacherId === teacher.id}
           >
             <h3>{teacher.name}</h3>
             <p className="subject">{teacher.subject}</p>
             {teacher.room && <p className="room">📍 {teacher.room}</p>}
-          </div>
+          </button>
         ))}
       </div>
     </div>

@@ -27,18 +27,13 @@ export const BookingForm = ({
     message: '',
   });
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    // Validierung basierend auf Besuchertyp
-    if (formData.visitorType === 'parent') {
-      if (!formData.parentName || !formData.studentName || !formData.className || !formData.email) {
-        return;
-      }
-    } else {
-      if (!formData.companyName || !formData.traineeName || !formData.representativeName || !formData.className || !formData.email) {
-        return;
-      }
+
+    const formEl = e.currentTarget;
+    if (!formEl.checkValidity()) {
+      formEl.reportValidity();
+      return;
     }
 
     onSubmit(formData);
@@ -98,7 +93,7 @@ export const BookingForm = ({
         {formData.visitorType === 'parent' ? (
           <>
             <div className="form-group">
-              <label htmlFor="parentName">Name der Erziehungsberechtigten</label>
+              <label htmlFor="parentName">Name der erziehungsberechtigten Person(en)</label>
               <input
                 type="text"
                 id="parentName"
@@ -120,7 +115,7 @@ export const BookingForm = ({
                 onChange={(e) =>
                   setFormData({ ...formData, studentName: e.target.value })
                 }
-                placeholder="z.B. Max Müller"
+                placeholder="z.B. Alex Müller"
                 required
               />
             </div>
@@ -150,7 +145,7 @@ export const BookingForm = ({
                 onChange={(e) =>
                   setFormData({ ...formData, traineeName: e.target.value })
                 }
-                placeholder="z.B. Max Mustermann"
+                placeholder="z.B. Alex Mustermann"
                 required
               />
             </div>
@@ -164,7 +159,7 @@ export const BookingForm = ({
                 onChange={(e) =>
                   setFormData({ ...formData, representativeName: e.target.value })
                 }
-                placeholder="z.B. Frau/Herr Beispiel"
+                placeholder="z.B. Alex Beispiel"
                 required
               />
             </div>

@@ -226,6 +226,8 @@ export const BookingApp = () => {
             <SlotList
               slots={slots}
               selectedSlotId={selectedSlotId}
+              selectedTeacherId={selectedTeacherId}
+              eventId={activeEvent?.id ?? null}
               onSelectSlot={handleSelectSlot}
             />
           )}
