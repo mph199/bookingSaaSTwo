@@ -7,12 +7,54 @@ import { exportBookingsToICal } from '../utils/icalExport';
 import './AdminDashboard.css';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 
+type ActiveEvent = {
+  id: number;
+  name: string;
+  school_year: string;
+  starts_at: string;
+  ends_at: string;
+  status: 'draft' | 'published' | 'closed';
+  booking_opens_at?: string | null;
+  booking_closes_at?: string | null;
+};
+
+type EventStats = {
+  eventId: number;
+  totalSlots: number;
+  availableSlots: number;
+  bookedSlots: number;
+  reservedSlots: number;
+  confirmedSlots: number;
+};
+
 export function AdminDashboard() {
   const [bookings, setBookings] = useState<ApiBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeEvent, setActiveEvent] = useState<ActiveEvent | null>(null);
+  const [activeEventStats, setActiveEventStats] = useState<EventStats | null>(null);
+  const [activeEventStatsError, setActiveEventStatsError] = useState<string>('');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const formatDateTime = (iso?: string | null) => {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return null;
+    return new Intl.DateTimeFormat('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(d);
+  };
+
+  const statusLabel: Record<ActiveEvent['status'], string> = {
+    draft: 'Entwurf',
+    published: 'Veröffentlicht',
+    closed: 'Geschlossen',
+  };
 
   const loadBookings = useCallback(async () => {
     try {
@@ -30,9 +72,48 @@ export function AdminDashboard() {
     }
   }, [user]);
 
+  const loadActiveEvent = useCallback(async () => {
+    try {
+      const res = await api.events.getActive();
+      setActiveEvent(((res as any)?.event as ActiveEvent) || null);
+    } catch {
+      // Non-blocking: keep UI usable even if event endpoint fails
+      setActiveEvent(null);
+    }
+  }, []);
+
+  const loadActiveEventStats = useCallback(async (eventId: number) => {
+    try {
+      setActiveEventStatsError('');
+      const res = await api.admin.getEventStats(eventId);
+      setActiveEventStats(res as EventStats);
+    } catch (e) {
+      setActiveEventStats(null);
+      setActiveEventStatsError(e instanceof Error ? e.message : 'Fehler beim Laden der Slot-Statistik');
+    }
+  }, []);
+
   useEffect(() => {
     loadBookings();
   }, [loadBookings]);
+
+  useEffect(() => {
+    loadActiveEvent();
+  }, [loadActiveEvent]);
+
+  useEffect(() => {
+    if (user?.role !== 'admin') {
+      setActiveEventStats(null);
+      setActiveEventStatsError('');
+      return;
+    }
+    if (!activeEvent?.id) {
+      setActiveEventStats(null);
+      setActiveEventStatsError('');
+      return;
+    }
+    loadActiveEventStats(activeEvent.id);
+  }, [activeEvent?.id, loadActiveEventStats, user?.role]);
 
   const handleCancelBooking = async (slotId: number) => {
     if (!confirm('Möchten Sie diese Buchung wirklich stornieren?')) {
@@ -50,6 +131,28 @@ export function AdminDashboard() {
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const handleExportAll = async () => {
+    if (!bookings.length) return;
+
+    // Add rooms to LOCATION when possible (Admin has access to teachers with rooms).
+    if (user?.role === 'admin') {
+      try {
+        const teachers = await api.admin.getTeachers();
+        const teacherRoomById: Record<number, string | undefined> = {};
+        for (const t of teachers || []) {
+          if (t?.id) teacherRoomById[Number(t.id)] = t.room;
+        }
+        exportBookingsToICal(bookings, undefined, { teacherRoomById });
+        return;
+      } catch (e) {
+        console.warn('ICS export: could not load teachers for room mapping', e);
+        // Fallback: export without rooms
+      }
+    }
+
+    exportBookingsToICal(bookings);
   };
 
   if (loading) {
@@ -82,6 +185,39 @@ export function AdminDashboard() {
       </header>
 
       <main className="admin-main">
+        <div className="stat-card" style={{ marginBottom: 12, padding: '1rem 1.1rem' }}>
+          <h3 style={{ marginTop: 0 }}>Aktiver Elternsprechtag</h3>
+          {activeEvent ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <div style={{ fontWeight: 700 }}>{activeEvent.name}</div>
+              <div style={{ color: '#555' }}>
+                Schuljahr: {activeEvent.school_year} • Status: {statusLabel[activeEvent.status]}
+              </div>
+              <div style={{ color: '#555' }}>
+                Buchungsfenster: {formatDateTime(activeEvent.booking_opens_at) || 'sofort'} – {formatDateTime(activeEvent.booking_closes_at) || 'offen'}
+              </div>
+
+              {user?.role === 'admin' && (
+                <div style={{ color: '#555' }}>
+                  {activeEventStats ? (
+                    <>
+                      Slots: {activeEventStats.totalSlots} gesamt • {activeEventStats.availableSlots} verfügbar • {activeEventStats.reservedSlots} reserviert • {activeEventStats.confirmedSlots} bestätigt
+                    </>
+                  ) : activeEventStatsError ? (
+                    <>Slots: {activeEventStatsError}</>
+                  ) : (
+                    <>Slots: Laden…</>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ color: '#555' }}>
+              Kein aktiver Elternsprechtag gefunden (nicht veröffentlicht oder außerhalb des Buchungsfensters).
+            </div>
+          )}
+        </div>
+
         {user?.role === 'admin' && (
           <div className="admin-actions">
             <button 
@@ -128,7 +264,7 @@ export function AdminDashboard() {
         <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.75rem 0 0.5rem 0' }}>
           <div className="tooltip-container">
             <button
-              onClick={() => exportBookingsToICal(bookings)}
+              onClick={handleExportAll}
               className="btn-primary"
               disabled={bookings.length === 0}
             >
@@ -172,7 +308,7 @@ export function AdminDashboard() {
                     <td>{booking.teacherSubject}</td>
                     <td>{booking.date}</td>
                     <td>{booking.time}</td>
-                    <td>{booking.visitorType === 'parent' ? '👨‍👩‍👧' : '🏢'}</td>
+                    <td>{booking.visitorType === 'parent' ? 'Erziehungsberechtigte' : 'Ausbildungsbetrieb'}</td>
                     <td>
                       {booking.visitorType === 'parent' 
                         ? booking.parentName 

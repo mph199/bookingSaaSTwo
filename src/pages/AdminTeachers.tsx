@@ -17,9 +17,10 @@ export function AdminTeachers() {
   const [teachers, setTeachers] = useState<ApiTeacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<ApiTeacher | null>(null);
-  const [formData, setFormData] = useState({ name: '', system: 'dual' as 'dual' | 'vollzeit', room: '', username: '', password: '' });
+  const [formData, setFormData] = useState({ name: '', email: '', salutation: 'Herr' as 'Herr' | 'Frau' | 'Divers', system: 'dual' as 'dual' | 'vollzeit', room: '', username: '', password: '' });
   const [createdCreds, setCreatedCreds] = useState<{ username: string; tempPassword: string } | null>(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export function AdminTeachers() {
     try {
       setLoading(true);
       setError('');
-      const data = await api.getTeachers();
+      const data = await api.admin.getTeachers();
       setTeachers(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Laden der Lehrkräfte');
@@ -44,14 +45,23 @@ export function AdminTeachers() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim()) {
-      alert('Bitte alle Felder ausfüllen');
+    if (!formData.name.trim() || !formData.email.trim() || !formData.salutation) {
+      alert('Bitte Name, Anrede und E-Mail ausfüllen');
+      return;
+    }
+
+    const normalizedEmail = formData.email.trim().toLowerCase();
+    const isValidEmail = /^[a-z0-9._%+-]+@bksb\.nrw$/i.test(normalizedEmail);
+    if (!isValidEmail) {
+      alert('Die E-Mail-Adresse muss auf @bksb.nrw enden.');
       return;
     }
 
     try {
       const teacherData = {
         name: formData.name,
+        email: normalizedEmail,
+        salutation: formData.salutation,
         subject: 'Sprechstunde',
         system: formData.system,
         room: formData.room,
@@ -71,7 +81,7 @@ export function AdminTeachers() {
       await loadTeachers();
       setShowForm(false);
       setEditingTeacher(null);
-      setFormData({ name: '', system: 'dual', room: '', username: '', password: '' });
+      setFormData({ name: '', email: '', salutation: 'Herr', system: 'dual', room: '', username: '', password: '' });
     } catch (err) {
       console.error('Fehler beim Speichern:', err);
       alert(err instanceof Error ? err.message : 'Fehler beim Speichern');
@@ -82,6 +92,8 @@ export function AdminTeachers() {
     setEditingTeacher(teacher);
     setFormData({
       name: teacher.name,
+      email: teacher.email || '',
+      salutation: (teacher.salutation || 'Herr') as 'Herr' | 'Frau' | 'Divers',
       system: teacher.system || 'dual', // Fallback falls system undefined ist
       room: teacher.room || '',
       username: '',
@@ -107,7 +119,7 @@ export function AdminTeachers() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingTeacher(null);
-    setFormData({ name: '', system: 'dual', room: '', username: '', password: '' });
+    setFormData({ name: '', email: '', salutation: 'Herr', system: 'dual', room: '', username: '', password: '' });
   };
 
   const handleLogout = async () => {
@@ -160,6 +172,33 @@ export function AdminTeachers() {
           )}
         </div>
 
+        {!showForm && (
+          <div className="admin-teacher-search">
+            <label htmlFor="teacherAdminSearch" className="admin-teacher-search-label">
+              Suche
+            </label>
+            <div className="admin-teacher-search-row">
+              <input
+                id="teacherAdminSearch"
+                className="admin-teacher-search-input"
+                type="text"
+                placeholder="Name, E-Mail oder Raum…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search && (
+                <button
+                  type="button"
+                  className="btn-secondary btn-secondary--sm"
+                  onClick={() => setSearch('')}
+                >
+                  Löschen
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="admin-error">
             {error}
@@ -178,6 +217,30 @@ export function AdminTeachers() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="z.B. Max Mustermann"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="salutation">Anrede</label>
+                <select
+                  id="salutation"
+                  value={formData.salutation}
+                  onChange={(e) => setFormData({ ...formData, salutation: e.target.value as 'Herr' | 'Frau' | 'Divers' })}
+                  required
+                >
+                  <option value="Herr">Herr</option>
+                  <option value="Frau">Frau</option>
+                  <option value="Divers">Divers</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="email">E-Mail (muss auf @bksb.nrw enden)</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="z.B. vorname.nachname@bksb.nrw"
                   required
                 />
               </div>
@@ -266,7 +329,14 @@ export function AdminTeachers() {
           </div>
         )}
 
-        {teachers.length === 0 ? (
+        {teachers.filter((t) => {
+          const q = search.trim().toLowerCase();
+          if (!q) return true;
+          const name = (t.name || '').toLowerCase();
+          const email = (t.email || '').toLowerCase();
+          const room = (t.room || '').toLowerCase();
+          return name.includes(q) || email.includes(q) || room.includes(q);
+        }).length === 0 ? (
           <div className="no-teachers">
             <p>Keine Lehrkräfte vorhanden.</p>
           </div>
@@ -277,6 +347,8 @@ export function AdminTeachers() {
                 <tr>
                   <th>ID</th>
                   <th>Name</th>
+                  <th>Anrede</th>
+                  <th>E-Mail</th>
                   <th>System</th>
                   <th>Sprechstunde</th>
                   <th>Raum</th>
@@ -284,10 +356,21 @@ export function AdminTeachers() {
                 </tr>
               </thead>
               <tbody>
-                {teachers.map((teacher) => (
+                {teachers
+                  .filter((t) => {
+                    const q = search.trim().toLowerCase();
+                    if (!q) return true;
+                    const name = (t.name || '').toLowerCase();
+                    const email = (t.email || '').toLowerCase();
+                    const room = (t.room || '').toLowerCase();
+                    return name.includes(q) || email.includes(q) || room.includes(q);
+                  })
+                  .map((teacher) => (
                   <tr key={teacher.id}>
                     <td>{teacher.id}</td>
                     <td className="teacher-name">{teacher.name}</td>
+                    <td>{teacher.salutation || '-'}</td>
+                    <td>{teacher.email || '-'}</td>
                     <td>{teacher.system === 'vollzeit' ? 'Vollzeit' : 'Dual'}</td>
                     <td>{teacher.system === 'vollzeit' ? '17:00 - 19:00 Uhr' : '16:00 - 18:00 Uhr'}</td>
                     <td>{teacher.room || '-'}</td>

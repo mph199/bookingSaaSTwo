@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/useAuth';
 import api from '../services/api';
 import type { TimeSlot as ApiSlot, Teacher as ApiTeacher } from '../types';
 import { exportTeacherSlotsToICal } from '../utils/icalExport';
+import { teacherDisplayName } from '../utils/teacherDisplayName';
 import './AdminDashboard.css';
 import { Breadcrumbs } from '../components/Breadcrumbs';
 
@@ -16,6 +17,7 @@ export function AdminSlots() {
   const [showForm, setShowForm] = useState(false);
   const [editingSlot, setEditingSlot] = useState<ApiSlot | null>(null);
   const [formData, setFormData] = useState({ time: '', date: '' });
+  const [bulkCreating, setBulkCreating] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -148,12 +150,38 @@ export function AdminSlots() {
         <div className="admin-section-header">
           <h2>Zeitslots verwalten</h2>
           {selectedTeacherId && !showForm && (
-            <button 
-              onClick={() => setShowForm(true)} 
-              className="btn-primary"
-            >
-              + Neuer Slot
-            </button>
+            <div className="action-buttons action-buttons--compact">
+              <button 
+                onClick={() => setShowForm(true)} 
+                className="btn-primary"
+              >
+                + Neuer Slot
+              </button>
+              <button
+                onClick={async () => {
+                  if (!selectedTeacherId) return;
+                  const name = selectedTeacher ? teacherDisplayName(selectedTeacher) : 'diese Lehrkraft';
+                  if (!confirm(`Alle Slots für ${name} anlegen?`)) return;
+                  try {
+                    setBulkCreating(true);
+                    const res = await api.admin.generateTeacherSlots(selectedTeacherId);
+                    const created = (res as any)?.created ?? 0;
+                    const skipped = (res as any)?.skipped ?? 0;
+                    const eventDate = (res as any)?.eventDate;
+                    await loadSlots(selectedTeacherId);
+                    alert(`Slots angelegt${eventDate ? ` (${eventDate})` : ''}: ${created}\nBereits vorhanden: ${skipped}`);
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : 'Fehler beim Anlegen der Slots');
+                  } finally {
+                    setBulkCreating(false);
+                  }
+                }}
+                className="btn-secondary"
+                disabled={bulkCreating}
+              >
+                {bulkCreating ? 'Anlegen…' : 'Alle Slots anlegen'}
+              </button>
+            </div>
           )}
         </div>
 
@@ -180,7 +208,7 @@ export function AdminSlots() {
           >
             {teachers.map((teacher) => (
               <option key={teacher.id} value={teacher.id}>
-                {teacher.name} - {teacher.system === 'vollzeit' ? 'Vollzeit' : 'Dual'}
+                {teacherDisplayName(teacher)} - {teacher.system === 'vollzeit' ? 'Vollzeit' : 'Dual'}
               </option>
             ))}
           </select>
@@ -235,13 +263,13 @@ export function AdminSlots() {
               <div className="settings-info" style={{ marginBottom: '1.5rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <h3>Slots für {selectedTeacher.name}</h3>
+                    <h3>Slots für {teacherDisplayName(selectedTeacher)}</h3>
                     <p>System: {selectedTeacher.system === 'vollzeit' ? 'Vollzeit (17:00 - 19:00)' : 'Dual (16:00 - 18:00)'}</p>
                     <p>Anzahl Slots: {slots.length} ({slots.filter(s => s.booked).length} gebucht)</p>
                   </div>
                   {slots.filter(s => s.booked).length > 0 && (
                     <button
-                      onClick={() => exportTeacherSlotsToICal(slots, selectedTeacher.name)}
+                      onClick={() => exportTeacherSlotsToICal(slots, teacherDisplayName(selectedTeacher), selectedTeacher.room)}
                       className="btn-primary"
                     >
                       📅 Termine exportieren

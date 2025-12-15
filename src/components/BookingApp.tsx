@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
-import { TeacherList } from './TeacherList';
 import { SlotList } from './SlotList';
 import { BookingForm } from './BookingForm';
+import { TeacherCombobox } from './TeacherCombobox';
 import { useBooking } from '../hooks/useBooking';
 import type { Teacher } from '../types';
+import { teacherDisplayNameAccusative } from '../utils/teacherDisplayName';
 import api from '../services/api';
 import './BookingApp.css';
 
@@ -27,7 +28,6 @@ export const BookingApp = () => {
   const [teachersLoading, setTeachersLoading] = useState<boolean>(true);
   const [teachersError, setTeachersError] = useState<string>('');
   const [selectedTeacherId, setSelectedTeacherId] = useState<number | null>(null);
-  const [teacherSearch, setTeacherSearch] = useState<string>('');
   const [activeEvent, setActiveEvent] = useState<ActiveEvent>(null);
   const [eventLoading, setEventLoading] = useState<boolean>(true);
   const [eventError, setEventError] = useState<string>('');
@@ -100,20 +100,24 @@ export const BookingApp = () => {
     loadTeachers();
   }, []);
 
-  const filteredTeachers = useMemo(() => {
-    return teachers.filter((t) => {
-      const searchLower = teacherSearch.trim().toLowerCase();
-      const matchesSearch = searchLower
-        ? t.name.toLowerCase().includes(searchLower)
-        : true;
-      return matchesSearch;
-    });
-  }, [teachers, teacherSearch]);
-
   const handleTeacherSelect = (teacherId: number) => {
     setSelectedTeacherId(teacherId);
     resetSelection();
   };
+
+  const handleClearTeacher = () => {
+    setSelectedTeacherId(null);
+    resetSelection();
+  };
+
+  const selectedTeacher = useMemo(() => {
+    if (!selectedTeacherId) return null;
+    return teachers.find((t) => t.id === selectedTeacherId) ?? null;
+  }, [teachers, selectedTeacherId]);
+
+  const selectedTeacherAccusativeName = useMemo(() => {
+    return selectedTeacher ? teacherDisplayNameAccusative(selectedTeacher) : null;
+  }, [selectedTeacher]);
 
   return (
     <div className="booking-app">
@@ -174,47 +178,15 @@ export const BookingApp = () => {
 
       <div className="app-content">
         <aside className="sidebar">
-          <form
-            className="teacher-search"
-            aria-label="Lehrkraft suchen"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <div className="teacher-search-group">
-              <label htmlFor="teacherSearch">Lehrkraft</label>
-              <input
-                id="teacherSearch"
-                type="text"
-                placeholder="Name suchen..."
-                value={teacherSearch}
-                onChange={(e) => {
-                  setTeacherSearch(e.target.value);
-                  setSelectedTeacherId(null);
-                }}
-                aria-label="Lehrkraft nach Namen filtern"
-                disabled={teachersLoading}
-              />
-              {teacherSearch && (
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-small clear-btn"
-                  onClick={() => {
-                    setTeacherSearch('');
-                    setSelectedTeacherId(null);
-                  }}
-                  aria-label="Suche zurücksetzen"
-                >
-                  Löschen
-                </button>
-              )}
-            </div>
-          </form>
           {teachersLoading && <p className="loading-message">Lade Lehrkräfte...</p>}
           {teachersError && <p className="error-message">{teachersError}</p>}
           {!teachersLoading && !teachersError && (
-            <TeacherList
-              teachers={filteredTeachers}
+            <TeacherCombobox
+              teachers={teachers}
               selectedTeacherId={selectedTeacherId}
+              disabled={teachersLoading}
               onSelectTeacher={handleTeacherSelect}
+              onClearSelection={handleClearTeacher}
             />
           )}
         </aside>
@@ -227,6 +199,7 @@ export const BookingApp = () => {
               slots={slots}
               selectedSlotId={selectedSlotId}
               selectedTeacherId={selectedTeacherId}
+              selectedTeacherName={selectedTeacherAccusativeName}
               eventId={activeEvent?.id ?? null}
               onSelectSlot={handleSelectSlot}
             />

@@ -1,6 +1,8 @@
 export interface Teacher {
   id: number;
   name: string;
+  email?: string;
+  salutation?: 'Herr' | 'Frau' | 'Divers';
   subject: string;
   room?: string;
   system?: 'dual' | 'vollzeit';
@@ -13,6 +15,7 @@ export interface TimeSlot {
   date: string;
   booked: boolean;
   status?: 'reserved' | 'confirmed';
+  verifiedAt?: string | null;
   // Present on some admin/teacher booking list responses
   teacherName?: string;
   teacherSubject?: string;

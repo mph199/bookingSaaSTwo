@@ -85,8 +85,8 @@ export const BookingForm = ({
             }
             required
           >
-            <option value="parent">👨‍👩‍👧 Erziehungsberechtigte</option>
-            <option value="company">🏢 Ausbildungsbetrieb</option>
+            <option value="parent">Erziehungsberechtigte</option>
+            <option value="company">Ausbildungsbetrieb</option>
           </select>
         </div>
 

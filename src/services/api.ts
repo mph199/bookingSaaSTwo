@@ -114,7 +114,8 @@ const api = {
       return requestJSON(`/admin/bookings/${bookingId}`, { method: 'DELETE', auth: true });
     },
     async getTeachers() {
-      return requestJSON('/admin/teachers', { auth: true });
+      const res = await requestJSON('/admin/teachers', { auth: true });
+      return (res && (res as any).teachers) || [];
     },
     async createTeacher(payload: any) {
       return requestJSON('/admin/teachers', {
@@ -153,6 +154,9 @@ const api = {
     async deleteSlot(id: number) {
       return requestJSON(`/admin/slots/${id}`, { method: 'DELETE', auth: true });
     },
+    async generateTeacherSlots(id: number) {
+      return requestJSON(`/admin/teachers/${id}/generate-slots`, { method: 'POST', auth: true });
+    },
     async resetTeacherLogin(id: number) {
       return requestJSON(`/admin/teachers/${id}/reset-login`, { method: 'PUT', auth: true });
     },
@@ -178,6 +182,9 @@ const api = {
     },
     async deleteEvent(id: number) {
       return requestJSON(`/admin/events/${id}`, { method: 'DELETE', auth: true });
+    },
+    async getEventStats(eventId: number) {
+      return requestJSON(`/admin/events/${eventId}/stats`, { auth: true });
     },
     async generateEventSlots(eventId: number, payload: any) {
       return requestJSON(`/admin/events/${eventId}/generate-slots`, {

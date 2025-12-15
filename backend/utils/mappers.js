@@ -8,6 +8,7 @@ export function mapSlotRow(slot) {
     date: slot.date,
     booked: slot.booked,
     status: slot.status,
+    verifiedAt: slot.verified_at,
     visitorType: slot.visitor_type,
     parentName: slot.parent_name,
     companyName: slot.company_name,

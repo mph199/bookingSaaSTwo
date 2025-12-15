@@ -461,6 +461,42 @@
   gap: 1.25rem;
 }
 
+/* Admin teacher search (match booking combobox feel) */
+.admin-teacher-search {
+  margin-bottom: 1rem;
+}
+
+.admin-teacher-search-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #065f46;
+}
+
+.admin-teacher-search-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.admin-teacher-search-input {
+  flex: 1;
+  padding: 0.55rem 0.6rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-teacher-search-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.25);
+}
+
 /* Simple admin grid helpers */
 .admin-grid-2 {
   display: grid;

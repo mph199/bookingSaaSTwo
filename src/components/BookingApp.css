@@ -139,20 +139,16 @@
   transform: translateY(0) scale(0.98);
 }
 
-/* Header Filter Form */
-/* Entfernt altes Header-Filter-Formular; neue Lehrkraftsuche in Sidebar */
-.teacher-search {
-  margin: -0.25rem 0 0.9rem; /* zieht Suche näher an Logo-Höhe; Abstand zur Liste */
-  display: block;
-}
-
-.teacher-search-group {
+/* Lehrkraft Combobox */
+.teacher-combobox {
+  margin: -0.25rem 0 0.9rem;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
+  position: relative;
 }
 
-.teacher-search-group label {
+.teacher-combobox-label {
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -160,7 +156,14 @@
   color: #065f46;
 }
 
-.teacher-search-group input {
+.teacher-combobox-inputRow {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.teacher-combobox-input {
+  flex: 1;
   padding: 0.55rem 0.6rem;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
@@ -168,16 +171,128 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.teacher-search-group input:focus {
+.teacher-combobox-input:focus {
   outline: none;
   border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(16,185,129,0.25);
 }
 
-.teacher-search-group .clear-btn {
-  align-self: flex-start;
-  margin-top: 0.2rem;
-  padding: 0.4rem 0.7rem;
+.teacher-combobox-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+}
+
+.teacher-combobox-selected {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 0.4rem;
+  row-gap: 0.25rem;
+  align-items: baseline;
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.10);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  color: #065f46;
+  width: fit-content;
+}
+
+.teacher-combobox-selectedLabel {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #065f46;
+  opacity: 0.75;
+}
+
+.teacher-combobox-selectedValue {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #065f46;
+  opacity: 0.92;
+}
+
+.teacher-combobox-selectedSpacer {
+  height: 0;
+}
+
+.teacher-combobox-selectedMeta {
+  position: relative;
+  padding-left: 18px; /* space for pin */
+  font-size: 0.88rem;
+  color: #374151;
+  line-height: 1.25;
+}
+
+.teacher-combobox-pin {
+  position: absolute;
+  left: 0;
+  top: 0.1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.teacher-combobox-pin svg {
+  fill: #991b1b;
+}
+
+.teacher-combobox-room {
+  font-weight: 800;
+}
+
+.teacher-combobox-popover {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 12px;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+  z-index: 20;
+  overflow: hidden;
+}
+
+.teacher-combobox-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.teacher-combobox-option {
+  padding: 0.6rem 0.65rem;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #0b3b2a;
+  font-weight: 600;
+}
+
+.teacher-combobox-option.active {
+  background: rgba(16, 185, 129, 0.10);
+}
+
+.teacher-combobox-option.selected {
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.teacher-combobox-option.active.selected {
+  background: rgba(16, 185, 129, 0.22);
+  border-color: rgba(16, 185, 129, 0.50);
+}
+
+.teacher-combobox-empty {
+  padding: 0.75rem;
+  color: #065f46;
+  font-weight: 600;
 }
 
 /* Entfernte alte Filter-Gruppen */
@@ -239,6 +354,7 @@
   height: fit-content;
   position: sticky;
   top: 1.25rem;
+  z-index: 5;
 }
 
 .teacher-list h2 {
@@ -755,6 +871,24 @@
     margin-bottom: 1.5rem; /* Abstand zum Content */
   }
 
+  .app-header .header-content {
+    align-items: flex-start;
+  }
+
+  .brand {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .brand-title {
+    font-size: 1.15rem;
+  }
+
+  .subpage-badge {
+    font-size: 0.75rem;
+    padding: 0.22rem 0.5rem;
+  }
+
   .app-header .header-title {
     font-size: 1.25rem;
   }
@@ -773,6 +907,26 @@
 
   .sidebar {
     margin-bottom: 1.5rem; /* Abstand zur Slot-Liste */
+  }
+
+  .sidebar,
+  .slot-list,
+  .booking-form-container {
+    padding: 1rem;
+    border-radius: 14px;
+  }
+
+  .main-content {
+    gap: 1rem;
+  }
+
+  .slot-list h2,
+  .booking-form-container h2 {
+    font-size: 1.15rem;
+  }
+
+  .teacher-combobox-list {
+    max-height: 260px;
   }
 
   /* Horizontal Scrolling für Lehrer-Liste */
@@ -807,8 +961,11 @@
     gap: 0.75rem;
     position: sticky;
     bottom: 0;
-    background: white;
-    padding: 1rem 0 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(229, 231, 235, 0.8);
+    padding: 0.75rem 0 0;
     margin-top: 1rem;
   }
 
@@ -835,6 +992,14 @@
 
   .slot-card {
     padding: 0.875rem;
+  }
+
+  .teacher-combobox-inputRow {
+    flex-wrap: wrap;
+  }
+
+  .teacher-combobox-clear {
+    width: 100%;
   }
 }
 

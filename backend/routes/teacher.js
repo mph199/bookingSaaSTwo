@@ -108,6 +108,8 @@ router.get('/info', requireAuth, requireTeacher, async (req, res) => {
       teacher: {
         id: data.id,
         name: data.name,
+        email: data.email,
+        salutation: data.salutation,
         subject: data.subject,
         system: data.system,
         room: data.room
@@ -245,6 +247,32 @@ router.put('/bookings/:slotId/accept', requireAuth, requireTeacher, async (req, 
     const teacherId = req.user.teacherId;
     if (!teacherId) {
       return res.status(400).json({ error: 'Teacher ID not found in token' });
+    }
+
+    // Load current state first (needed to enforce email verification before confirmation)
+    const { data: current, error: curErr } = await supabase
+      .from('slots')
+      .select('*')
+      .eq('id', slotId)
+      .eq('teacher_id', teacherId)
+      .eq('booked', true)
+      .single();
+
+    if (curErr) {
+      if (curErr.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Slot not found or not booked' });
+      }
+      throw curErr;
+    }
+
+    if (current?.status === 'confirmed') {
+      return res.json({ success: true, slot: current });
+    }
+
+    if (!current?.verified_at) {
+      return res.status(409).json({
+        error: 'Buchung kann erst bestätigt werden, nachdem die E-Mail-Adresse verifiziert wurde',
+      });
     }
 
     // Update status to confirmed

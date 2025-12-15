@@ -1,4 +1,5 @@
 import type { Teacher } from '../types';
+import { teacherDisplayName } from '../utils/teacherDisplayName';
 
 interface TeacherListProps {
   teachers: Teacher[];
@@ -26,7 +27,7 @@ export const TeacherList = ({
             role="listitem"
             aria-pressed={selectedTeacherId === teacher.id}
           >
-            <h3>{teacher.name}</h3>
+            <h3>{teacherDisplayName(teacher)}</h3>
             <p className="subject">{teacher.subject}</p>
             {teacher.room && <p className="room">📍 {teacher.room}</p>}
           </button>

@@ -4,6 +4,7 @@ interface SlotListProps {
   slots: TimeSlot[];
   selectedSlotId: number | null;
   selectedTeacherId: number | null;
+  selectedTeacherName?: string | null;
   eventId: number | null;
   onSelectSlot: (slotId: number) => void;
 }
@@ -12,6 +13,7 @@ export const SlotList = ({
   slots,
   selectedSlotId,
   selectedTeacherId,
+  selectedTeacherName,
   eventId,
   onSelectSlot,
 }: SlotListProps) => {
@@ -21,9 +23,13 @@ export const SlotList = ({
       ? 'Buchungen sind aktuell nicht freigeschaltet. Bitte versuchen Sie es später erneut.'
       : 'Für diese Lehrkraft sind aktuell keine Termine verfügbar. Bitte wählen Sie eine andere Lehrkraft oder versuchen Sie es später erneut.';
 
+  const headline = selectedTeacherId && selectedTeacherName
+    ? `Verfügbare Termine bei ${selectedTeacherName}`
+    : 'Verfügbare Termine';
+
   return (
-    <div className="slot-list" role="region" aria-label="Verfügbare Termine">
-      <h2>Verfügbare Termine</h2>
+    <div className="slot-list" role="region" aria-label={headline}>
+      <h2>{headline}</h2>
       <div className="slots-container" role="list">
         {slots.length === 0 ? (
           <p className="no-slots">

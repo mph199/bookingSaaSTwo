@@ -69,9 +69,20 @@ export function TeacherDashboard() {
     })();
   }, []);
 
-  const handleCancelBooking = async (slotId: number) => {
-    if (!confirm('Möchten Sie diese Buchung wirklich stornieren?')) {
-      return;
+  const handleCancelBooking = async (booking: TimeSlot) => {
+    const slotId = booking.id;
+    if (booking.status === 'confirmed') {
+      const typed = prompt(
+        'Dieser Termin wurde bereits bestätigt.\n\nSind Sie sicher, dass Sie den Termin stornieren möchten? Die/der Besuchende wird darüber informiert.\n\nBitte geben Sie zur Bestätigung exakt "Stornieren" ein:'
+      );
+      if (typed !== 'Stornieren') {
+        setNotice('Stornierung nicht bestätigt.');
+        return;
+      }
+    } else {
+      if (!confirm('Möchten Sie diese Buchung wirklich stornieren?')) {
+        return;
+      }
     }
     try {
       await api.teacher.cancelBooking(slotId);
@@ -185,7 +196,8 @@ export function TeacherDashboard() {
     }
     exportBookingsToICal(
       filtered.map((b) => ({ ...b, teacherName: teacher?.name || 'Lehrkraft' })),
-      undefined
+      undefined,
+      { defaultRoom: teacher?.room }
     );
   };
 
@@ -367,9 +379,10 @@ export function TeacherDashboard() {
           {teacher && (
             <div className="stat-card" style={{ flex: '0 1 330px', minWidth: 240, padding: '1.1rem 1.1rem' }}>
               <h3>Raum</h3>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ flex: '1 1 auto', minWidth: 160 }}>
-                  <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Derzeitiger Raum</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ fontSize: 12, color: '#666' }}>Derzeitiger Raum</div>
+
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'nowrap' }}>
                   <div
                     style={{
                       background: '#eee',
@@ -379,25 +392,26 @@ export function TeacherDashboard() {
                       color: '#333',
                       minWidth: 120,
                       textAlign: 'center',
+                      flex: '0 0 auto',
                     }}
                   >
                     {teacher.room ? teacher.room : '—'}
                   </div>
-                </div>
 
-                <button
-                  onClick={() => {
-                    setError('');
-                    setNotice('');
-                    setRoomDraft(teacher.room || '');
-                    setShowRoomDialog(true);
-                  }}
-                  className="btn-primary"
-                  disabled={savingRoom}
-                  style={{ padding: '0.55rem 0.9rem', whiteSpace: 'nowrap' }}
-                >
-                  Raum ändern
-                </button>
+                  <button
+                    onClick={() => {
+                      setError('');
+                      setNotice('');
+                      setRoomDraft(teacher.room || '');
+                      setShowRoomDialog(true);
+                    }}
+                    className="btn-primary"
+                    disabled={savingRoom}
+                    style={{ padding: '0.55rem 0.9rem', whiteSpace: 'nowrap', marginLeft: 'auto' }}
+                  >
+                    Raum ändern
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -487,15 +501,21 @@ export function TeacherDashboard() {
                       <td>
                         <div className="action-buttons">
                           {booking.status === 'reserved' && (
-                            <button
-                              onClick={() => handleAcceptBooking(booking.id)}
-                              className="btn-primary"
-                            >
-                              Bestätigen
-                            </button>
+                            <div className="tooltip-container">
+                              <button
+                                onClick={() => handleAcceptBooking(booking.id)}
+                                className="btn-primary"
+                                disabled={!booking.verifiedAt}
+                              >
+                                Bestätigen
+                              </button>
+                              {!booking.verifiedAt && (
+                                <span className="tooltip">Erst möglich, wenn die E-Mail-Adresse bestätigt wurde</span>
+                              )}
+                            </div>
                           )}
                           <button
-                            onClick={() => handleCancelBooking(booking.id)}
+                            onClick={() => handleCancelBooking(booking)}
                             className="cancel-button"
                           >
                             Stornieren
