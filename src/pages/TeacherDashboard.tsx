@@ -239,19 +239,20 @@ export function TeacherDashboard() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: 16,
+              padding: 12,
               zIndex: 1000,
             }}
           >
             <div
               className="stat-card"
               style={{
-                width: 'min(560px, 100%)',
-                maxHeight: 'calc(100vh - 32px)',
+                width: 'min(520px, 100%)',
+                maxHeight: 'calc(100vh - 24px)',
                 overflow: 'auto',
+                padding: '1.25rem',
               }}
             >
-              <h3>Raum ändern</h3>
+              <h3 style={{ marginTop: 0, marginBottom: 8 }}>Raum ändern</h3>
               <p style={{ marginTop: 4, marginBottom: 12, color: '#555', lineHeight: 1.35 }}>
                 Hinweis: Räume sollten nur geändert werden, wenn dies zuvor mit dem Sekretariat abgestimmt wurde.
               </p>
@@ -269,7 +270,7 @@ export function TeacherDashboard() {
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 14, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 12, flexWrap: 'wrap' }}>
                 <button
                   onClick={() => {
                     setError('');
@@ -291,6 +292,7 @@ export function TeacherDashboard() {
                   }}
                   className="btn-primary"
                   disabled={savingRoom}
+                  style={{ padding: '0.6rem 1.05rem' }}
                 >
                   {savingRoom ? 'Speichern…' : 'Speichern'}
                 </button>
@@ -339,21 +341,21 @@ export function TeacherDashboard() {
           </div>
         )}
 
-        <div className="admin-stats">
-          <div className="stat-card" style={{ flex: '0 1 520px', minWidth: 260 }}>
+        <div className="admin-stats" style={{ gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          <div className="stat-card" style={{ flex: '1 1 360px', minWidth: 240, padding: '1.1rem 1.1rem' }}>
             <h3>Filter</h3>
-            <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               <input
                 type="text"
                 placeholder="Suche (Name, Klasse, E-Mail)"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                style={{ padding: '8px 10px', flex: '1 1 220px' }}
+                style={{ padding: '8px 10px', flex: '1 1 200px' }}
               />
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value as 'all' | 'parent' | 'company')}
-                style={{ padding: '8px 10px', flex: '0 0 220px' }}
+                style={{ padding: '8px 10px', flex: '0 1 200px' }}
               >
                 <option value="all">Alle</option>
                 <option value="parent">Erziehungsberechtigte</option>
@@ -363,9 +365,9 @@ export function TeacherDashboard() {
           </div>
 
           {teacher && (
-            <div className="stat-card" style={{ flex: '0 1 360px', minWidth: 260 }}>
+            <div className="stat-card" style={{ flex: '0 1 330px', minWidth: 240, padding: '1.1rem 1.1rem' }}>
               <h3>Raum</h3>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
                 <div style={{ flex: '1 1 auto' }}>
                   <div style={{ fontSize: 12, color: '#666', marginBottom: 6 }}>Derzeitiger Raum</div>
                   <div
@@ -392,7 +394,7 @@ export function TeacherDashboard() {
                   }}
                   className="btn-primary"
                   disabled={savingRoom}
-                  style={{ padding: '0.55rem 0.95rem' }}
+                  style={{ padding: '0.55rem 0.9rem', whiteSpace: 'nowrap' }}
                 >
                   Raumänderung vornehmen
                 </button>
@@ -400,7 +402,7 @@ export function TeacherDashboard() {
             </div>
           )}
 
-          <div className="stat-card" style={{ minWidth: 220 }}>
+          <div className="stat-card" style={{ flex: '0 0 220px', minWidth: 220, padding: '1.1rem 1.1rem' }}>
             <h3>Meine Termine</h3>
             <p className="stat-number">{bookings.length}</p>
             <p className="stat-label">Gebuchte Gespräche</p>
