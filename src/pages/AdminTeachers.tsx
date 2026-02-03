@@ -5,7 +5,7 @@ import api from '../services/api';
 import type { Teacher as ApiTeacher } from '../types';
 import './AdminDashboard.css';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { Dropdown } from '../components/Dropdown';
+import { Sidebar } from '../components/Sidebar';
 
 type TeacherLoginResponse = {
   user?: {
@@ -181,7 +181,7 @@ export function AdminTeachers() {
       <header className="admin-header">
         <div className="admin-header-content">
           <div className="admin-header-left">
-            <Dropdown label="Menü" ariaLabel="Menü" variant="icon" align="left">
+            <Sidebar label="Menü" ariaLabel="Menü" variant="icon" side="left">
               {({ close }) => (
                 <>
                   <div className="dropdown__sectionTitle">Aktionen</div>
@@ -246,7 +246,7 @@ export function AdminTeachers() {
                   </button>
                 </>
               )}
-            </Dropdown>
+            </Sidebar>
             <Breadcrumbs />
           </div>
           <div className="admin-header-meta">

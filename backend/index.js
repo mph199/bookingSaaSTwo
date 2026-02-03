@@ -122,6 +122,34 @@ app.get('/api/admin/feedback', requireAdmin, async (_req, res) => {
   }
 });
 
+// DELETE /api/admin/feedback/:id - Delete a single feedback entry (admin only)
+app.delete('/api/admin/feedback/:id', requireAdmin, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    return res.status(400).json({ error: 'Invalid feedback id' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('feedback')
+      .delete()
+      .eq('id', id)
+      .select('id');
+
+    if (error) throw error;
+
+    const deleted = Array.isArray(data) ? data.length : 0;
+    if (!deleted) {
+      return res.status(404).json({ error: 'Feedback not found' });
+    }
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting feedback:', error);
+    return res.status(500).json({ error: 'Failed to delete feedback' });
+  }
+});
+
 // GET /api/slots?teacherId=1
 app.get('/api/slots', async (req, res) => {
   try {

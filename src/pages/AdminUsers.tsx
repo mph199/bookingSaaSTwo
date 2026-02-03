@@ -5,7 +5,7 @@ import api from '../services/api';
 import type { UserAccount } from '../types';
 import './AdminDashboard.css';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { Dropdown } from '../components/Dropdown';
+import { Sidebar } from '../components/Sidebar';
 
 export function AdminUsers() {
   const [users, setUsers] = useState<UserAccount[]>([]);
@@ -128,7 +128,7 @@ export function AdminUsers() {
         <header className="admin-header">
           <div className="admin-header-content">
             <div className="admin-header-left">
-              <Dropdown label="Menü" ariaLabel="Menü" variant="icon" align="left">
+              <Sidebar label="Menü" ariaLabel="Menü" variant="icon" side="left">
                 {({ close }) => (
                   <>
                     <div className="dropdown__sectionTitle">Aktionen</div>
@@ -193,7 +193,7 @@ export function AdminUsers() {
                     </button>
                   </>
                 )}
-              </Dropdown>
+              </Sidebar>
               <Breadcrumbs />
             </div>
             <div className="admin-header-meta">
@@ -216,7 +216,7 @@ export function AdminUsers() {
       <header className="admin-header">
         <div className="admin-header-content">
           <div className="admin-header-left">
-            <Dropdown label="Menü" ariaLabel="Menü" variant="icon" align="left">
+            <Sidebar label="Menü" ariaLabel="Menü" variant="icon" side="left">
               {({ close }) => (
                 <>
                   <div className="dropdown__sectionTitle">Aktionen</div>
@@ -281,7 +281,7 @@ export function AdminUsers() {
                   </button>
                 </>
               )}
-            </Dropdown>
+            </Sidebar>
             <Breadcrumbs />
           </div>
           <div className="admin-header-meta">

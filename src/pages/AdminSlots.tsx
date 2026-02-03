@@ -7,7 +7,7 @@ import { exportTeacherSlotsToICal } from '../utils/icalExport';
 import { teacherDisplayName, teacherGroupKey } from '../utils/teacherDisplayName';
 import './AdminDashboard.css';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { Dropdown } from '../components/Dropdown';
+import { Sidebar } from '../components/Sidebar';
 
 export function AdminSlots() {
   const [teachers, setTeachers] = useState<ApiTeacher[]>([]);
@@ -136,7 +136,7 @@ export function AdminSlots() {
       <header className="admin-header">
         <div className="admin-header-content">
           <div className="admin-header-left">
-            <Dropdown label="Menü" ariaLabel="Menü" variant="icon" align="left">
+            <Sidebar label="Menü" ariaLabel="Menü" variant="icon" side="left">
               {({ close }) => (
                 <>
                   <div className="dropdown__sectionTitle">Aktionen</div>
@@ -201,7 +201,7 @@ export function AdminSlots() {
                   </button>
                 </>
               )}
-            </Dropdown>
+            </Sidebar>
             <Breadcrumbs />
           </div>
           <div className="admin-header-meta">

@@ -6,7 +6,7 @@ import type { TimeSlot as ApiBooking, FeedbackItem } from '../types';
 import { exportBookingsToICal } from '../utils/icalExport';
 import './AdminDashboard.css';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { Dropdown } from '../components/Dropdown';
+import { Sidebar } from '../components/Sidebar';
 
 type ActiveEvent = {
   id: number;
@@ -36,6 +36,7 @@ export function AdminDashboard() {
   const [feedbackLoading, setFeedbackLoading] = useState<boolean>(false);
   const [feedbackError, setFeedbackError] = useState<string>('');
   const [feedbackOpen, setFeedbackOpen] = useState<boolean>(false);
+  const [deletingFeedbackId, setDeletingFeedbackId] = useState<number | null>(null);
   const [activeEvent, setActiveEvent] = useState<ActiveEvent | null>(null);
   const [activeEventStats, setActiveEventStats] = useState<EventStats | null>(null);
   const [activeEventStatsError, setActiveEventStatsError] = useState<string>('');
@@ -189,6 +190,30 @@ export function AdminDashboard() {
     exportBookingsToICal(bookings);
   };
 
+  const handleDeleteFeedback = async (id: number) => {
+    if (user?.role !== 'admin') return;
+    if (deletingFeedbackId) return;
+
+    const item = feedback.find((f) => f.id === id);
+    const messagePreview = (item?.message || '').trim().slice(0, 120);
+
+    const ok = confirm(
+      `Feedback wirklich löschen?${messagePreview ? `\n\n„${messagePreview}${item?.message && item.message.length > 120 ? '…' : ''}“` : ''}`
+    );
+    if (!ok) return;
+
+    try {
+      setDeletingFeedbackId(id);
+      setFeedbackError('');
+      await api.admin.deleteFeedback(id);
+      setFeedback((prev) => prev.filter((f) => f.id !== id));
+    } catch (e) {
+      setFeedbackError(e instanceof Error ? e.message : 'Fehler beim Löschen des Feedbacks');
+    } finally {
+      setDeletingFeedbackId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="admin-loading">
@@ -204,7 +229,7 @@ export function AdminDashboard() {
       <header className="admin-header">
         <div className="admin-header-content">
           <div className="admin-header-left">
-            <Dropdown label="Menü" ariaLabel="Menü" variant="icon" align="left">
+            <Sidebar label="Menü" ariaLabel="Menü" variant="icon" side="left">
               {({ close }) => (
                 <>
                   <div className="dropdown__sectionTitle">Aktionen</div>
@@ -269,7 +294,7 @@ export function AdminDashboard() {
                   </button>
                 </>
               )}
-            </Dropdown>
+            </Sidebar>
             <Breadcrumbs />
           </div>
           <div className="admin-header-meta">
@@ -281,20 +306,22 @@ export function AdminDashboard() {
       </header>
 
       <main className="admin-main">
-        <div className="stat-card" style={{ marginBottom: 12, padding: '1rem 1.1rem' }}>
-          <h3 style={{ marginTop: 0 }}>Aktiver Elternsprechtag</h3>
+        <div className="admin-section-header">
+          <h2>Aktiver Elternsprechtag</h2>
+        </div>
+        <div className="teacher-form-container">
           {activeEvent ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ fontWeight: 700 }}>{activeEvent.name}</div>
-              <div style={{ color: '#555' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ fontWeight: 800, color: '#111827' }}>{activeEvent.name}</div>
+              <div style={{ color: '#4b5563' }}>
                 Schuljahr: {activeEvent.school_year} • Status: {statusLabel[activeEvent.status]}
               </div>
-              <div style={{ color: '#555' }}>
+              <div style={{ color: '#4b5563' }}>
                 Buchungsfenster: {formatDateTime(activeEvent.booking_opens_at) || 'sofort'} – {formatDateTime(activeEvent.booking_closes_at) || 'offen'}
               </div>
 
               {user?.role === 'admin' && (
-                <div style={{ color: '#555' }}>
+                <div style={{ color: '#4b5563' }}>
                   {activeEventStats ? (
                     <>
                       Slots: {activeEventStats.totalSlots} gesamt • {activeEventStats.availableSlots} verfügbar • {activeEventStats.reservedSlots} reserviert • {activeEventStats.confirmedSlots} bestätigt
@@ -308,7 +335,7 @@ export function AdminDashboard() {
               )}
             </div>
           ) : (
-            <div style={{ color: '#555' }}>
+            <div style={{ color: '#4b5563' }}>
               Kein aktiver Elternsprechtag gefunden (nicht veröffentlicht oder außerhalb des Buchungsfensters).
             </div>
           )}
@@ -317,9 +344,9 @@ export function AdminDashboard() {
         {/* Navigation ist im Menü gebündelt */}
 
         {user?.role === 'admin' && (
-          <div className="teacher-form-container" style={{ marginBottom: '1.25rem' }}>
-            <div className="admin-feedback-header">
-              <h3 className="admin-feedback-title">Feedback (anonym)</h3>
+          <>
+            <div className="admin-section-header">
+              <h2>Feedback (anonym)</h2>
               <div className="admin-feedback-actions">
                 <button
                   type="button"
@@ -340,38 +367,53 @@ export function AdminDashboard() {
                 </button>
               </div>
             </div>
+            <div className="teacher-form-container">
+              {feedbackOpen ? (
+                <div id="admin-feedback-panel">
+                  {feedbackError && <div className="admin-error">{feedbackError}</div>}
 
-            {feedbackOpen && (
-              <div id="admin-feedback-panel">
-                {feedbackError && <div className="admin-error">{feedbackError}</div>}
-
-                {!feedbackError && (feedbackLoading ? (
-                  <div style={{ color: '#555' }}>Lade Feedback…</div>
-                ) : feedback.length === 0 ? (
-                  <div style={{ color: '#555' }}>Noch kein Feedback vorhanden.</div>
-                ) : (
-                  <div className="bookings-table-container" style={{ marginTop: 10 }}>
-                    <table className="bookings-table">
-                      <thead>
-                        <tr>
-                          <th>Datum</th>
-                          <th>Nachricht</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {feedback.map((f) => (
-                          <tr key={f.id}>
-                            <td>{formatDateTime(f.created_at) || f.created_at}</td>
-                            <td className="message-cell">{f.message}</td>
+                  {!feedbackError && (feedbackLoading ? (
+                    <div style={{ color: '#4b5563' }}>Lade Feedback…</div>
+                  ) : feedback.length === 0 ? (
+                    <div style={{ color: '#4b5563' }}>Noch kein Feedback vorhanden.</div>
+                  ) : (
+                    <div className="bookings-table-container" style={{ marginTop: 10 }}>
+                      <table className="bookings-table">
+                        <thead>
+                          <tr>
+                            <th>Datum</th>
+                            <th>Nachricht</th>
+                            <th>Aktionen</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                        </thead>
+                        <tbody>
+                          {feedback.map((f) => (
+                            <tr key={f.id}>
+                              <td>{formatDateTime(f.created_at) || f.created_at}</td>
+                              <td className="message-cell">{f.message}</td>
+                              <td style={{ whiteSpace: 'nowrap' }}>
+                                <button
+                                  type="button"
+                                  className="cancel-button"
+                                  onClick={() => handleDeleteFeedback(f.id)}
+                                  disabled={deletingFeedbackId === f.id}
+                                  title="Feedback löschen"
+                                >
+                                  {deletingFeedbackId === f.id ? 'Löschen…' : 'Löschen'}
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ color: '#4b5563' }}>Feedback ist ausgeblendet.</div>
+              )}
+            </div>
+          </>
         )}
 
         {/* Counter removed per request */}
@@ -382,7 +424,8 @@ export function AdminDashboard() {
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0.75rem 0 0.5rem 0' }}>
+        <div className="admin-section-header">
+          <h2>Buchungen des Kollegiums</h2>
           <div className="tooltip-container">
             <button
               onClick={handleExportAll}

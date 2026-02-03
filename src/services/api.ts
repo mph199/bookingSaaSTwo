@@ -200,6 +200,11 @@ const api = {
       return (res && (res as any).feedback) || [];
     },
 
+    async deleteFeedback(id: number) {
+      const safeId = encodeURIComponent(String(id));
+      return requestJSON(`/admin/feedback/${safeId}`, { method: 'DELETE', auth: true });
+    },
+
     // Users / Roles
     async getUsers() {
       const res = await requestJSON('/admin/users', { auth: true });

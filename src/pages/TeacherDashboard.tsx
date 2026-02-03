@@ -7,7 +7,7 @@ import { exportBookingsToICal } from '../utils/icalExport';
 import { teacherPersonName } from '../utils/teacherDisplayName';
 import './AdminDashboard.css';
 import { Breadcrumbs } from '../components/Breadcrumbs';
-import { Dropdown } from '../components/Dropdown';
+import { Sidebar } from '../components/Sidebar';
 
 type TeacherInfo = {
   id: number;
@@ -244,7 +244,7 @@ export function TeacherDashboard() {
         <div className="admin-header-content admin-header-content--teacher">
           <div className="admin-header-left">
             {canSwitchView && (
-              <Dropdown label="Ansicht" ariaLabel="Ansicht" variant="icon" align="left">
+              <Sidebar label="Ansicht" ariaLabel="Ansicht" variant="icon" side="left">
                 {({ close }) => (
                   <>
                     <div className="dropdown__sectionTitle">Ansicht</div>
@@ -286,7 +286,7 @@ export function TeacherDashboard() {
                     </button>
                   </>
                 )}
-              </Dropdown>
+              </Sidebar>
             )}
             <Breadcrumbs />
           </div>

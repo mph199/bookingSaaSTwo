@@ -27,7 +27,10 @@ export function Breadcrumbs() {
 
   return (
     <nav className="breadcrumbs" aria-label="Breadcrumb">
-      <Link to="/" className="crumb home">BKSB Buchungssystem</Link>
+      <Link to="/" className="crumb home">
+        <span className="breadcrumbs__homeLong">BKSB Buchungssystem</span>
+        <span className="breadcrumbs__homeShort">BKSB</span>
+      </Link>
       {crumbs.map((p, i) => (
         <span className="crumb-wrap" key={p}>
           <span className="sep" aria-hidden>›</span>

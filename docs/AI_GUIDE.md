@@ -62,6 +62,8 @@ Hinweis (Wartungsmodus): Das Frontend kann per Env `VITE_MAINTENANCE_MODE=true|1
 - Admin:
   - `GET /api/admin/bookings` → `{ bookings: Booking[] }`
   - `DELETE /api/admin/bookings/:slotId` → `{ success: boolean }`
+  - `GET /api/admin/feedback` → `{ feedback: { id, message, created_at }[] }`
+  - `DELETE /api/admin/feedback/:id` → `{ success: boolean }`
   - `GET /api/admin/users` → `{ users: { id, username, role, teacher_id, created_at, updated_at }[] }`
   - `PATCH /api/admin/users/:id` → `{ success: boolean, user: { ... } }` (Role-Update; erlaubt: `admin` | `teacher`)
   - `GET /api/admin/slots` → `{ slots: Slot[] }` (optional `teacherId`, `eventId`, `booked`, `limit`)
