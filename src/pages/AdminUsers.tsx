@@ -4,8 +4,8 @@ import { useAuth } from '../contexts/useAuth';
 import api from '../services/api';
 import type { UserAccount } from '../types';
 import './AdminDashboard.css';
-import { Breadcrumbs } from '../components/Breadcrumbs';
 import { Sidebar } from '../components/Sidebar';
+import { ExperimentalHeader } from '../components/ExperimentalHeader';
 
 export function AdminUsers() {
   const [users, setUsers] = useState<UserAccount[]>([]);
@@ -115,7 +115,6 @@ export function AdminUsers() {
   if (loading) {
     return (
       <div className="admin-loading">
-        <Breadcrumbs />
         <div className="spinner"></div>
         <p>Lade Benutzer…</p>
       </div>
@@ -125,98 +124,18 @@ export function AdminUsers() {
   if (user?.role !== 'admin') {
     return (
       <div className="admin-dashboard">
-        <header className="admin-header">
-          <div className="admin-header-content">
-            <div className="admin-header-left">
-              <Sidebar label="Menü" ariaLabel="Menü" variant="icon" side="left">
-                {({ close }) => (
-                  <>
-                    <div className="dropdown__sectionTitle">Aktionen</div>
-                    <button type="button" className="dropdown__item" onClick={() => { navigate('/admin'); close(); }}>
-                      <span>Übersicht öffnen</span>
-                    </button>
-                    <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/teachers'); close(); }}>
-                      <span>Lehrkräfte verwalten</span>
-                    </button>
-                    <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/events'); close(); }}>
-                      <span>Elternsprechtage verwalten</span>
-                    </button>
-                    <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/slots'); close(); }}>
-                      <span>Slots verwalten</span>
-                    </button>
-                    <button type="button" className="dropdown__item dropdown__item--active" onClick={() => { navigate('/admin/users'); close(); }}>
-                      <span>Benutzer & Rechte verwalten</span>
-                      <span className="dropdown__hint">Aktiv</span>
-                    </button>
-
-                    {canSwitchView && (
-                      <>
-                        <div className="dropdown__divider" role="separator" />
-                        <div className="dropdown__sectionTitle">Ansicht</div>
-                        <button
-                          type="button"
-                          className={activeView === 'teacher' ? 'dropdown__item dropdown__item--active' : 'dropdown__item'}
-                          onClick={() => {
-                            setActiveView('teacher');
-                            navigate('/teacher', { replace: true });
-                            close();
-                          }}
-                        >
-                          <span>Lehrkraft</span>
-                          {activeView === 'teacher' && <span className="dropdown__hint">Aktiv</span>}
-                        </button>
-                        <button
-                          type="button"
-                          className={activeView !== 'teacher' ? 'dropdown__item dropdown__item--active' : 'dropdown__item'}
-                          onClick={() => {
-                            setActiveView('admin');
-                            navigate('/admin', { replace: true });
-                            close();
-                          }}
-                        >
-                          <span>Admin</span>
-                          {activeView !== 'teacher' && <span className="dropdown__hint">Aktiv</span>}
-                        </button>
-                      </>
-                    )}
-
-                    <div className="dropdown__divider" role="separator" />
-                    <button
-                      type="button"
-                      className="dropdown__item dropdown__item--danger"
-                      onClick={() => {
-                        close();
-                        handleLogout();
-                      }}
-                    >
-                      <span>Abmelden</span>
-                    </button>
-                  </>
-                )}
-              </Sidebar>
-              <Breadcrumbs />
-            </div>
-            <div className="admin-header-meta">
-              <p className="admin-user">
-                Willkommen in der Admin-Ansicht, <strong>{user?.fullName || user?.username}</strong>!
-              </p>
-            </div>
-            <div className="header-actions" />
-          </div>
-        </header>
-        <main className="admin-main">
-          <div className="admin-error">Keine Berechtigung: Adminrechte erforderlich.</div>
-        </main>
-      </div>
-    );
-  }
-
-  return (
-    <div className="admin-dashboard">
-      <header className="admin-header">
-        <div className="admin-header-content">
-          <div className="admin-header-left">
-            <Sidebar label="Menü" ariaLabel="Menü" variant="icon" side="left">
+        <ExperimentalHeader
+          sectionLabel="Admin · Benutzer & Rechte verwalten"
+          userLabel={user?.fullName || user?.username}
+          menu={
+            <Sidebar
+              label="Menü"
+              ariaLabel="Menü"
+              variant="icon"
+              side="left"
+              noWrapper
+              buttonClassName="expHeader__menuLines"
+            >
               {({ close }) => (
                 <>
                   <div className="dropdown__sectionTitle">Aktionen</div>
@@ -269,6 +188,9 @@ export function AdminUsers() {
                   )}
 
                   <div className="dropdown__divider" role="separator" />
+                  <button type="button" className="dropdown__item" onClick={() => { navigate('/'); close(); }}>
+                    <span>Zur Buchungsseite</span>
+                  </button>
                   <button
                     type="button"
                     className="dropdown__item dropdown__item--danger"
@@ -282,16 +204,99 @@ export function AdminUsers() {
                 </>
               )}
             </Sidebar>
-            <Breadcrumbs />
-          </div>
-          <div className="admin-header-meta">
-            <p className="admin-user">
-              Willkommen in der Admin-Ansicht, <strong>{user?.fullName || user?.username}</strong>!
-            </p>
-          </div>
-          <div className="header-actions" />
-        </div>
-      </header>
+          }
+        />
+        <main className="admin-main">
+          <div className="admin-error">Keine Berechtigung: Adminrechte erforderlich.</div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-dashboard">
+      <ExperimentalHeader
+        sectionLabel="Admin · Benutzer & Rechte verwalten"
+        userLabel={user?.fullName || user?.username}
+        menu={
+          <Sidebar
+            label="Menü"
+            ariaLabel="Menü"
+            variant="icon"
+            side="left"
+            noWrapper
+            buttonClassName="expHeader__menuLines"
+          >
+            {({ close }) => (
+              <>
+                <div className="dropdown__sectionTitle">Aktionen</div>
+                <button type="button" className="dropdown__item" onClick={() => { navigate('/admin'); close(); }}>
+                  <span>Übersicht öffnen</span>
+                </button>
+                <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/teachers'); close(); }}>
+                  <span>Lehrkräfte verwalten</span>
+                </button>
+                <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/events'); close(); }}>
+                  <span>Elternsprechtage verwalten</span>
+                </button>
+                <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/slots'); close(); }}>
+                  <span>Slots verwalten</span>
+                </button>
+                <button type="button" className="dropdown__item dropdown__item--active" onClick={() => { navigate('/admin/users'); close(); }}>
+                  <span>Benutzer & Rechte verwalten</span>
+                  <span className="dropdown__hint">Aktiv</span>
+                </button>
+
+                {canSwitchView && (
+                  <>
+                    <div className="dropdown__divider" role="separator" />
+                    <div className="dropdown__sectionTitle">Ansicht</div>
+                    <button
+                      type="button"
+                      className={activeView === 'teacher' ? 'dropdown__item dropdown__item--active' : 'dropdown__item'}
+                      onClick={() => {
+                        setActiveView('teacher');
+                        navigate('/teacher', { replace: true });
+                        close();
+                      }}
+                    >
+                      <span>Lehrkraft</span>
+                      {activeView === 'teacher' && <span className="dropdown__hint">Aktiv</span>}
+                    </button>
+                    <button
+                      type="button"
+                      className={activeView !== 'teacher' ? 'dropdown__item dropdown__item--active' : 'dropdown__item'}
+                      onClick={() => {
+                        setActiveView('admin');
+                        navigate('/admin', { replace: true });
+                        close();
+                      }}
+                    >
+                      <span>Admin</span>
+                      {activeView !== 'teacher' && <span className="dropdown__hint">Aktiv</span>}
+                    </button>
+                  </>
+                )}
+
+                <div className="dropdown__divider" role="separator" />
+                <button type="button" className="dropdown__item" onClick={() => { navigate('/'); close(); }}>
+                  <span>Zur Buchungsseite</span>
+                </button>
+                <button
+                  type="button"
+                  className="dropdown__item dropdown__item--danger"
+                  onClick={() => {
+                    close();
+                    handleLogout();
+                  }}
+                >
+                  <span>Abmelden</span>
+                </button>
+              </>
+            )}
+          </Sidebar>
+        }
+      />
 
       <main className="admin-main">
         <div className="admin-success">

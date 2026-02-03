@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000/api';
+const RAW_API_BASE =
+  (import.meta as any).env?.VITE_API_URL ||
+  ((import.meta as any).env?.DEV ? '/api' : 'http://localhost:4000/api');
+const API_BASE = String(RAW_API_BASE).replace(/\/+$/, '');
 
 function getAuthHeaders(): HeadersInit {
   const token = localStorage.getItem('auth_token');
@@ -18,7 +21,7 @@ async function requestJSON(path: string, options: RequestInit & { auth?: boolean
   try {
     response = await fetch(`${API_BASE}${path}`, { ...rest, headers: mergedHeaders });
   } catch {
-    throw new Error('Netzwerkfehler – bitte Verbindung prüfen.');
+    throw new Error('Backend nicht erreichbar – läuft das Backend (Port 4000)?');
   }
 
   const tryParse = async () => {

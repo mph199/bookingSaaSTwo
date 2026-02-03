@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import './Sidebar.css';
 
 type SidebarSide = 'left' | 'right';
 
@@ -14,6 +15,8 @@ type SidebarProps = {
   side?: SidebarSide;
   variant?: 'text' | 'icon';
   buttonClassName?: string;
+  noWrapper?: boolean;
+  icon?: ReactNode;
   children: (ctx: SidebarRenderCtx) => ReactNode;
 };
 
@@ -33,6 +36,8 @@ export function Sidebar({
   side = 'left',
   variant = 'text',
   buttonClassName,
+  noWrapper = false,
+  icon,
   children,
 }: SidebarProps) {
   const [open, setOpen] = useState(false);
@@ -176,56 +181,70 @@ export function Sidebar({
     </svg>
   );
 
+  const buttonProps: Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'ref'> = {
+    id: buttonId,
+    type: 'button',
+    className: resolvedButtonClassName,
+    'aria-label': variant === 'icon' ? resolvedAriaLabel : undefined,
+    'aria-haspopup': 'dialog',
+    'aria-expanded': open,
+    'aria-controls': panelId,
+    onClick: () => (open ? close() : openSidebar()),
+  };
+
+  const resolvedIcon = icon ?? hamburgerIcon;
+  const triggerNode = (
+    <button {...buttonProps}>
+      {variant === 'icon' ? resolvedIcon : label}
+    </button>
+  );
+
+  const portalNode =
+    rendered &&
+    createPortal(
+      <div className={overlayClassName} role="presentation" onPointerDown={() => close()}>
+        <aside
+          id={panelId}
+          className={panelClassName}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={buttonId}
+          ref={(node) => {
+            panelRef.current = node;
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          <div className="sidebar__header">
+            <div className="sidebar__title">{label}</div>
+            <button
+              ref={closeButtonRef}
+              type="button"
+              className="sidebar__close"
+              onClick={() => close()}
+              aria-label="Schließen"
+            >
+              {closeIcon}
+            </button>
+          </div>
+          <div className="sidebar__content">{children({ close })}</div>
+        </aside>
+      </div>,
+      document.body
+    );
+
+  if (noWrapper) {
+    return (
+      <>
+        {triggerNode}
+        {portalNode}
+      </>
+    );
+  }
+
   return (
     <div className="sidebar" ref={rootRef}>
-      <button
-        id={buttonId}
-        type="button"
-        className={resolvedButtonClassName}
-        aria-label={variant === 'icon' ? resolvedAriaLabel : undefined}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-controls={panelId}
-        onClick={() => (open ? close() : openSidebar())}
-      >
-        {variant === 'icon' ? hamburgerIcon : label}
-      </button>
-
-      {rendered &&
-        createPortal(
-          <div
-            className={overlayClassName}
-            role="presentation"
-            onPointerDown={() => close()}
-          >
-            <aside
-              id={panelId}
-              className={panelClassName}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={buttonId}
-              ref={(node) => {
-                panelRef.current = node;
-              }}
-              onPointerDown={(e) => e.stopPropagation()}
-            >
-              <div className="sidebar__header">
-                <div className="sidebar__title">{label}</div>
-                <button
-                  ref={closeButtonRef}
-                  type="button"
-                  className="sidebar__close"
-                  onClick={() => close()}
-                  aria-label="Schließen"
-                >
-                  {closeIcon}
-                </button>
-              </div>
-              <div className="sidebar__content">{children({ close })}</div>
-            </aside>
-          </div>,
-          document.body
-        )}
+      {triggerNode}
+      {portalNode}
     </div>
   );
 }

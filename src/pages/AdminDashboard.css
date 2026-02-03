@@ -1,6 +1,4 @@
 .admin-dashboard {
-  --page-max-width: 1280px;
-  --page-gutter: 1.25rem;
   min-height: 100vh;
   /* Background: white base with subtle green accents (variant of booking page) */
   background-color: #ffffff;
@@ -48,10 +46,7 @@
 }
 
 .admin-header-content {
-  --header-control-size: 36px;
-  box-sizing: border-box;
-  width: calc(100% - (var(--page-gutter) * 2));
-  max-width: calc(var(--page-max-width) - (var(--page-gutter) * 2));
+  max-width: 1280px;
   margin: 0 auto 1rem;
   padding: 0.9rem 1rem 1rem;
   display: flex;
@@ -59,147 +54,34 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem;
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow:
-    0 10px 26px rgba(0, 0, 0, 0.06),
-    0 1px 2px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+    0 10px 30px rgba(0, 0, 0, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 12px;
-  overflow: hidden;
 }
 
-.admin-header-left {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 1 1 auto;
-  min-width: 240px;
-}
-
-/* In the header, keep breadcrumbs in one line and clip/fade overflow
-   so they never overlap the centered welcome text. */
-.admin-header-left .breadcrumbs {
-  flex: 1 1 auto;
-  min-width: 0;
-  max-width: 100%;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, #000 88%, transparent);
-  mask-image: linear-gradient(to right, #000 88%, transparent);
-  align-self: center;
-  min-height: var(--header-control-size);
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  line-height: 1.1;
-}
-
-.admin-header-left .breadcrumbs .crumb,
-.admin-header-left .breadcrumbs .current {
-  padding-top: 0.15rem;
-  padding-bottom: 0.15rem;
-}
-
-/* Teacher dashboard header: allow wrapping by default (mobile-first) */
+/* Teacher dashboard header: keep actions on one row on wider screens */
 .admin-header-content--teacher {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .admin-header-meta {
   flex: 1 1 auto;
   min-width: 260px;
-  text-align: right;
-}
-
-/* Desktop header: true center alignment for the welcome message */
-@media (min-width: 721px) {
-  .admin-header-content {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: 0.75rem;
-  }
-
-  .admin-header-left {
-    min-width: 0;
-    justify-self: start;
-  }
-
-  .admin-header-meta {
-    min-width: 0;
-    justify-self: stretch;
-    text-align: right;
-  }
-
-  .header-actions {
-    justify-self: end;
-  }
 }
 
 .admin-header-content--teacher .header-actions {
   margin-left: auto;
 }
 
-@media (min-width: 960px) {
+@media (max-width: 960px) {
   .admin-header-content--teacher {
-    flex-wrap: nowrap;
-  }
-}
-
-/* Header responsiveness: stack key blocks on small screens */
-@media (max-width: 720px) {
-  .admin-header-content {
-    padding: 0.75rem 0.85rem 0.9rem;
-    align-items: flex-start;
-  }
-
-  .admin-header-left {
-    flex: 1 1 100%;
-    order: 1;
-    min-width: 0;
-    flex-wrap: nowrap;
-  }
-
-  .admin-header-left .breadcrumbs {
-    flex: 1 1 0;
-    min-width: 0;
-  }
-
-  .admin-header-meta {
-    flex: 1 1 100%;
-    min-width: 0;
-    order: 2;
-  }
-
-  .header-actions {
-    flex: 1 1 100%;
-    width: 100%;
-    justify-content: stretch;
-    gap: 0.5rem;
-    order: 3;
-  }
-
-  .header-actions > button,
-  .header-actions > a {
-    flex: 1 1 160px;
-  }
-
-  .view-toggle {
-    width: 100%;
-  }
-
-  .view-toggle__btn {
-    flex: 1 1 0;
-    text-align: center;
-  }
-}
-
-@media (max-width: 420px) {
-  .header-actions > button,
-  .header-actions > a {
-    flex: 1 1 100%;
+    flex-wrap: wrap;
   }
 }
 
@@ -211,8 +93,7 @@
 .admin-user {
   margin: 0;
   font-size: 0.95rem;
-  color: #111827;
-  opacity: 1;
+  opacity: 0.9;
 }
 
 .admin-user strong {
@@ -257,32 +138,14 @@
 }
 
 .admin-main {
-  box-sizing: border-box;
-  width: 100%;
-  max-width: var(--page-max-width);
+  max-width: 1280px;
   margin: 0 auto;
-  padding: var(--page-gutter);
+  padding: 1.25rem;
 }
 
-@media (max-width: 768px) {
-  .admin-dashboard {
-    --page-gutter: 1rem;
-  }
-}
-
-/* Breadcrumbs in header: always plain navigation (never a chip), regardless of global .breadcrumbs styles */
-.admin-dashboard .admin-header .breadcrumbs {
+/* Breadcrumb positioning & theming in header */
+.admin-header .breadcrumbs {
   margin: 0;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-.admin-dashboard .admin-header .breadcrumbs .current {
-  background: transparent;
 }
 
 /* Breadcrumb spacing in content areas */
@@ -291,89 +154,57 @@
 }
 
 /* Breadcrumbs base styles for admin pages */
-.admin-dashboard .breadcrumbs {
+.breadcrumbs {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   font-size: 0.9rem;
   color: #6b7280;
-  margin: 0 0 0.75rem;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
+  margin-bottom: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
-
-.admin-dashboard .breadcrumbs .crumb-wrap {
+.breadcrumbs .crumb-wrap {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  min-width: 0;
 }
-
-.admin-dashboard .breadcrumbs .crumb {
+.breadcrumbs .crumb {
   color: #374151;
   text-decoration: none;
-  padding: 0.15rem 0.35rem;
-  border-radius: 8px;
-  transition: background 120ms ease, color 120ms ease;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  transition: background 120ms ease;
 }
-
-.admin-dashboard .breadcrumbs .crumb:hover {
-  background: rgba(17, 24, 39, 0.06);
+.breadcrumbs .crumb:hover {
+  background: #f3f4f6;
 }
-
-.admin-dashboard .breadcrumbs .crumb:focus-visible {
-  outline: 3px solid rgba(16, 185, 129, 0.28);
-  outline-offset: 2px;
-}
-
-.admin-dashboard .breadcrumbs .crumb.home {
-  font-weight: 650;
-}
-
-.admin-dashboard .breadcrumbs .sep {
+.breadcrumbs .crumb.home { font-weight: 600; }
+.breadcrumbs .sep {
   color: #9ca3af;
-  margin: 0 0.1rem;
+  margin: 0 0.25rem;
 }
-
-.admin-dashboard .breadcrumbs .current {
+.breadcrumbs .current {
   color: #111827;
-  font-weight: 700;
-  background: transparent;
-}
-
-/* Responsive: shorten the home crumb on very small screens to reduce header noise */
-.admin-dashboard .breadcrumbs .breadcrumbs__homeShort {
-  display: none;
-}
-
-@media (max-width: 420px) {
-  .admin-dashboard .breadcrumbs {
-    font-size: 0.85rem;
-  }
-
-  .admin-dashboard .breadcrumbs .breadcrumbs__homeLong {
-    display: none;
-  }
-
-  .admin-dashboard .breadcrumbs .breadcrumbs__homeShort {
-    display: inline;
-  }
+  font-weight: 600;
+  background: #f3f4f6;
 }
 
 .admin-actions {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
 }
 
 .admin-action-button {
   background: white;
   border: 2px solid #e0e0e0;
-  padding: 1.25rem;
-  border-radius: 12px;
+  padding: 1.5rem;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -397,8 +228,8 @@
 
 .action-title {
   font-size: 1.1rem;
-  font-weight: 700;
-  color: #065f46;
+  font-weight: 600;
+  color: #10b981;
   margin-bottom: 0.25rem;
 }
 
@@ -410,13 +241,13 @@
 .admin-stats {
   display: flex;
   gap: 1.5rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
 }
 
 .stat-card {
   background: white;
-  padding: 1.25rem;
-  border-radius: 12px;
+  padding: 1.5rem;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   min-width: 200px;
 }
@@ -525,7 +356,7 @@
 
 .bookings-table-container {
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   overflow-x: auto;
   overflow-y: hidden;
@@ -574,23 +405,6 @@
   color: #10b981;
 }
 
-/* Admin view: slightly tighter tables + calmer accents */
-.admin-dashboard--admin .bookings-table th,
-.admin-dashboard--admin .bookings-table td {
-  padding: 0.85rem 0.9rem;
-  font-size: 0.92rem;
-}
-
-.admin-dashboard--admin .teacher-name {
-  color: #065f46;
-}
-
-.admin-dashboard--admin .cancel-button {
-  font-size: 0.85rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 6px;
-}
-
 .cancel-button {
   background: #dc3545;
   color: white;
@@ -611,305 +425,6 @@
   display: flex;
   gap: 1rem;
   align-items: center;
-}
-
-/* Dropdown (used in admin/teacher headers) */
-.dropdown {
-  position: relative;
-  display: inline-flex;
-}
-
-/* Sidebar (slide-out menu, used instead of dropdown menu in headers) */
-.sidebar {
-  position: relative;
-  display: inline-flex;
-}
-
-/* Header trigger: minimal (hamburger only), blends into the header */
-.sidebar__iconButton {
-  appearance: none;
-  width: var(--header-control-size);
-  height: var(--header-control-size);
-  border: 0;
-  background: transparent;
-  color: #111827;
-  border-radius: 10px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  opacity: 0.92;
-}
-
-.sidebar__iconButton:hover {
-  background: transparent;
-  color: #065f46;
-  opacity: 1;
-}
-
-.sidebar__iconButton:focus-visible {
-  outline: 3px solid rgba(16, 185, 129, 0.35);
-  outline-offset: 2px;
-}
-
-.sidebar__overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  display: flex;
-  background: rgba(17, 24, 39, 0.28);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  opacity: 0;
-  transition: opacity 220ms ease;
-}
-
-.sidebar__overlay--open {
-  opacity: 1;
-}
-
-.sidebar__overlay--left {
-  justify-content: flex-start;
-}
-
-.sidebar__overlay--right {
-  justify-content: flex-end;
-}
-
-.sidebar__panel {
-  height: 100%;
-  width: min(380px, 92vw);
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow:
-    0 18px 55px rgba(0, 0, 0, 0.22),
-    0 1px 3px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  display: flex;
-  flex-direction: column;
-  transform: translateX(-18px);
-  opacity: 0;
-  transition: transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1), opacity 220ms ease;
-}
-
-.sidebar__panel--right {
-  transform: translateX(18px);
-}
-
-.sidebar__panel--open {
-  transform: translateX(0);
-  opacity: 1;
-}
-
-.sidebar__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.9rem 1rem;
-  border-bottom: 1px solid rgba(229, 231, 235, 0.9);
-}
-
-.sidebar__title {
-  font-weight: 800;
-  color: #111827;
-  letter-spacing: 0.2px;
-}
-
-.sidebar__close {
-  appearance: none;
-  border: 1px solid rgba(209, 213, 219, 0.8);
-  background: rgba(255, 255, 255, 0.7);
-  color: #111827;
-  border-radius: 10px;
-  padding: 0.45rem 0.55rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-}
-
-.sidebar__close:hover {
-  background: rgba(243, 244, 246, 0.9);
-}
-
-.sidebar__content {
-  padding: 0.75rem;
-  overflow: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sidebar__overlay,
-  .sidebar__panel {
-    transition: none;
-  }
-}
-
-.dropdown__button {
-  appearance: none;
-  border: 1px solid #d1d5db;
-  background: rgba(255, 255, 255, 0.95);
-  color: #111827;
-  border-radius: 10px;
-  padding: 0.55rem 0.8rem;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  white-space: nowrap;
-}
-
-.dropdown__button:hover {
-  background: #fff;
-  border-color: #bfc7d2;
-}
-
-.dropdown__iconButton {
-  appearance: none;
-  width: 42px;
-  height: 42px;
-  border: 1px solid #d1d5db;
-  background: rgba(255, 255, 255, 0.95);
-  color: #111827;
-  border-radius: 12px;
-  cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.dropdown__iconButton:hover {
-  background: #fff;
-  border-color: #bfc7d2;
-}
-
-.dropdown__triangle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(0deg);
-  transform-origin: 50% 50%;
-  transition: transform 0.18s ease;
-  opacity: 0.95;
-}
-
-.dropdown__triangle--open {
-  transform: rotate(90deg);
-}
-
-.dropdown__caret {
-  font-size: 0.9em;
-  opacity: 0.7;
-}
-
-.dropdown__menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  min-width: 260px;
-  max-width: min(92vw, 360px);
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(209, 213, 219, 0.9);
-  border-radius: 12px;
-  box-shadow: 0 18px 48px rgba(0,0,0,0.14);
-  padding: 0.4rem;
-  z-index: 50;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.dropdown__menu--right {
-  left: auto;
-  right: 0;
-}
-
-.dropdown__item {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem 0.75rem;
-  border-radius: 10px;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-  font-weight: 650;
-  color: #111827;
-}
-
-.dropdown__item:hover {
-  background: #f3f4f6;
-}
-
-.dropdown__item--active {
-  background: rgba(16, 185, 129, 0.12);
-}
-
-.dropdown__item--danger {
-  color: #b91c1c;
-}
-
-.dropdown__item--danger:hover {
-  background: rgba(185, 28, 28, 0.08);
-}
-
-.dropdown__hint {
-  font-size: 0.9rem;
-  font-weight: 700;
-  opacity: 0.65;
-}
-
-.dropdown__divider {
-  height: 1px;
-  background: rgba(209, 213, 219, 0.9);
-  margin: 0.35rem 0.25rem;
-}
-
-.dropdown__sectionTitle {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #6b7280;
-}
-
-.view-toggle {
-  display: inline-flex;
-  border: 1px solid #d1d5db;
-  border-radius: 999px;
-  overflow: hidden;
-  background: #fff;
-}
-
-.view-toggle__btn {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  padding: 0.45rem 0.75rem;
-  font-weight: 600;
-  font-size: 0.92rem;
-  cursor: pointer;
-  color: #374151;
-}
-
-.view-toggle__btn:hover {
-  background: #f3f4f6;
-}
-
-.view-toggle__btn--active {
-  background: #2d5016;
-  color: #fff;
 }
 
 .back-button {
@@ -935,36 +450,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
 }
 
 .admin-section-header h2 {
-  font-size: 1.65rem;
-  font-weight: 800;
-  color: #065f46;
-  letter-spacing: -0.01em;
+  font-size: 1.8rem;
+  color: #10b981;
   margin: 0;
-}
-
-/* Admin view: headings outside cards/tiles use black */
-.admin-dashboard--admin .admin-section-header h2 {
-  color: #111827;
-}
-
-.admin-dashboard--admin .admin-section-header h2 {
-  font-size: 1.45rem;
-}
-
-.admin-dashboard--admin .teacher-form-container {
-  padding: 1.25rem;
-}
-
-@media (max-width: 720px) {
-  .admin-section-header {
-    align-items: flex-start;
-  }
 }
 
 /* Tooltip styling for action buttons */
@@ -1040,17 +532,16 @@
 
 .teacher-form-container {
   background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
+  padding: 2rem;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
 }
 
 .teacher-form-container h3 {
-  margin: 0 0 1.1rem 0;
-  color: #065f46;
-  font-size: 1.2rem;
-  font-weight: 800;
+  margin: 0 0 1.5rem 0;
+  color: #10b981;
+  font-size: 1.3rem;
 }
 
 .teacher-form {
