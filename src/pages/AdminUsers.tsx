@@ -5,7 +5,7 @@ import api from '../services/api';
 import type { UserAccount } from '../types';
 import './AdminDashboard.css';
 import { Sidebar } from '../components/Sidebar';
-import { ExperimentalHeader } from '../components/ExperimentalHeader';
+import { Header } from '../components/Header';
 
 export function AdminUsers() {
   const [users, setUsers] = useState<UserAccount[]>([]);
@@ -124,7 +124,7 @@ export function AdminUsers() {
   if (user?.role !== 'admin') {
     return (
       <div className="admin-dashboard">
-        <ExperimentalHeader
+        <Header
           sectionLabel="Admin · Benutzer & Rechte verwalten"
           userLabel={user?.fullName || user?.username}
           menu={
@@ -155,6 +155,9 @@ export function AdminUsers() {
                     <span>Benutzer & Rechte verwalten</span>
                     <span className="dropdown__hint">Aktiv</span>
                   </button>
+                  <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/feedback'); close(); }}>
+                    <span>Feedback einsehen</span>
+                  </button>
 
                   {canSwitchView && (
                     <>
@@ -165,7 +168,7 @@ export function AdminUsers() {
                         className={activeView === 'teacher' ? 'dropdown__item dropdown__item--active' : 'dropdown__item'}
                         onClick={() => {
                           setActiveView('teacher');
-                          navigate('/teacher', { replace: true });
+                            navigate('/teacher/bookings', { replace: true });
                           close();
                         }}
                       >
@@ -215,7 +218,7 @@ export function AdminUsers() {
 
   return (
     <div className="admin-dashboard">
-      <ExperimentalHeader
+      <Header
         sectionLabel="Admin · Benutzer & Rechte verwalten"
         userLabel={user?.fullName || user?.username}
         menu={
@@ -246,6 +249,9 @@ export function AdminUsers() {
                   <span>Benutzer & Rechte verwalten</span>
                   <span className="dropdown__hint">Aktiv</span>
                 </button>
+                <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/feedback'); close(); }}>
+                  <span>Feedback einsehen</span>
+                </button>
 
                 {canSwitchView && (
                   <>
@@ -256,7 +262,7 @@ export function AdminUsers() {
                       className={activeView === 'teacher' ? 'dropdown__item dropdown__item--active' : 'dropdown__item'}
                       onClick={() => {
                         setActiveView('teacher');
-                        navigate('/teacher', { replace: true });
+                          navigate('/teacher/bookings', { replace: true });
                         close();
                       }}
                     >

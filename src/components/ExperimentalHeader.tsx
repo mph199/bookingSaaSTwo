@@ -2,7 +2,7 @@ import './ExperimentalHeader.css';
 
 import type { ReactNode } from 'react';
 
-type ExperimentalHeaderProps = {
+export type ExperimentalHeaderProps = {
   sectionLabel: string;
   userLabel?: string;
   menu?: ReactNode;

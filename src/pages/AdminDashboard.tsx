@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/useAuth';
 import api from '../services/api';
-import type { TimeSlot as ApiBooking, FeedbackItem } from '../types';
+import type { TimeSlot as ApiBooking } from '../types';
 import { exportBookingsToICal } from '../utils/icalExport';
 import './AdminDashboard.css';
 import { Sidebar } from '../components/Sidebar';
-import { ExperimentalHeader } from '../components/ExperimentalHeader';
+import { Header } from '../components/Header';
 
 type ActiveEvent = {
   id: number;
@@ -32,11 +32,6 @@ export function AdminDashboard() {
   const [bookings, setBookings] = useState<ApiBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
-  const [feedbackLoading, setFeedbackLoading] = useState<boolean>(false);
-  const [feedbackError, setFeedbackError] = useState<string>('');
-  const [feedbackOpen, setFeedbackOpen] = useState<boolean>(false);
-  const [deletingFeedbackId, setDeletingFeedbackId] = useState<number | null>(null);
   const [activeEvent, setActiveEvent] = useState<ActiveEvent | null>(null);
   const [activeEventStats, setActiveEventStats] = useState<EventStats | null>(null);
   const [activeEventStatsError, setActiveEventStatsError] = useState<string>('');
@@ -105,25 +100,6 @@ export function AdminDashboard() {
     }
   }, []);
 
-  const loadFeedback = useCallback(async () => {
-    if (user?.role !== 'admin') {
-      setFeedback([]);
-      setFeedbackError('');
-      return;
-    }
-    try {
-      setFeedbackLoading(true);
-      setFeedbackError('');
-      const items = await api.admin.listFeedback();
-      setFeedback((items || []) as FeedbackItem[]);
-    } catch (e) {
-      setFeedback([]);
-      setFeedbackError(e instanceof Error ? e.message : 'Fehler beim Laden des Feedbacks');
-    } finally {
-      setFeedbackLoading(false);
-    }
-  }, [user?.role]);
-
   useEffect(() => {
     loadBookings();
   }, [loadBookings]);
@@ -131,10 +107,6 @@ export function AdminDashboard() {
   useEffect(() => {
     loadActiveEvent();
   }, [loadActiveEvent]);
-
-  useEffect(() => {
-    loadFeedback();
-  }, [loadFeedback]);
 
   useEffect(() => {
     if (user?.role !== 'admin') {
@@ -190,30 +162,6 @@ export function AdminDashboard() {
     exportBookingsToICal(bookings);
   };
 
-  const handleDeleteFeedback = async (id: number) => {
-    if (user?.role !== 'admin') return;
-    if (deletingFeedbackId) return;
-
-    const item = feedback.find((f) => f.id === id);
-    const messagePreview = (item?.message || '').trim().slice(0, 120);
-
-    const ok = confirm(
-      `Feedback wirklich löschen?${messagePreview ? `\n\n„${messagePreview}${item?.message && item.message.length > 120 ? '…' : ''}“` : ''}`
-    );
-    if (!ok) return;
-
-    try {
-      setDeletingFeedbackId(id);
-      setFeedbackError('');
-      await api.admin.deleteFeedback(id);
-      setFeedback((prev) => prev.filter((f) => f.id !== id));
-    } catch (e) {
-      setFeedbackError(e instanceof Error ? e.message : 'Fehler beim Löschen des Feedbacks');
-    } finally {
-      setDeletingFeedbackId(null);
-    }
-  };
-
   if (loading) {
     return (
       <div className="admin-loading">
@@ -225,7 +173,7 @@ export function AdminDashboard() {
 
   return (
     <div className="admin-dashboard admin-dashboard--admin">
-      <ExperimentalHeader
+      <Header
         sectionLabel="Admin · Übersicht"
         userLabel={user?.fullName || user?.username}
         menu={
@@ -256,6 +204,9 @@ export function AdminDashboard() {
                 <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/users'); close(); }}>
                   <span>Benutzer & Rechte verwalten</span>
                 </button>
+                <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/feedback'); close(); }}>
+                  <span>Feedback einsehen</span>
+                </button>
 
                 {canSwitchView && (
                   <>
@@ -266,7 +217,7 @@ export function AdminDashboard() {
                       className={activeView === 'teacher' ? 'dropdown__item dropdown__item--active' : 'dropdown__item'}
                       onClick={() => {
                         setActiveView('teacher');
-                        navigate('/teacher', { replace: true });
+                        navigate('/teacher/bookings', { replace: true });
                         close();
                       }}
                     >
@@ -345,79 +296,6 @@ export function AdminDashboard() {
         </div>
 
         {/* Navigation ist im Menü gebündelt */}
-
-        {user?.role === 'admin' && (
-          <>
-            <div className="admin-section-header">
-              <h2>Feedback (anonym)</h2>
-              <div className="admin-feedback-actions">
-                <button
-                  type="button"
-                  className="btn-secondary btn-secondary--sm"
-                  onClick={() => setFeedbackOpen((v) => !v)}
-                  aria-expanded={feedbackOpen}
-                  aria-controls="admin-feedback-panel"
-                >
-                  {feedbackOpen ? 'Ausblenden' : 'Anzeigen'}
-                </button>
-                <button
-                  type="button"
-                  className="btn-secondary btn-secondary--sm"
-                  onClick={loadFeedback}
-                  disabled={feedbackLoading}
-                >
-                  {feedbackLoading ? 'Laden…' : 'Aktualisieren'}
-                </button>
-              </div>
-            </div>
-            <div className="teacher-form-container">
-              {feedbackOpen ? (
-                <div id="admin-feedback-panel">
-                  {feedbackError && <div className="admin-error">{feedbackError}</div>}
-
-                  {!feedbackError && (feedbackLoading ? (
-                    <div style={{ color: '#4b5563' }}>Lade Feedback…</div>
-                  ) : feedback.length === 0 ? (
-                    <div style={{ color: '#4b5563' }}>Noch kein Feedback vorhanden.</div>
-                  ) : (
-                    <div className="bookings-table-container" style={{ marginTop: 10 }}>
-                      <table className="bookings-table">
-                        <thead>
-                          <tr>
-                            <th>Datum</th>
-                            <th>Nachricht</th>
-                            <th>Aktionen</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {feedback.map((f) => (
-                            <tr key={f.id}>
-                              <td>{formatDateTime(f.created_at) || f.created_at}</td>
-                              <td className="message-cell">{f.message}</td>
-                              <td style={{ whiteSpace: 'nowrap' }}>
-                                <button
-                                  type="button"
-                                  className="cancel-button"
-                                  onClick={() => handleDeleteFeedback(f.id)}
-                                  disabled={deletingFeedbackId === f.id}
-                                  title="Feedback löschen"
-                                >
-                                  {deletingFeedbackId === f.id ? 'Löschen…' : 'Löschen'}
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div style={{ color: '#4b5563' }}>Feedback ist ausgeblendet.</div>
-              )}
-            </div>
-          </>
-        )}
 
         {/* Counter removed per request */}
 

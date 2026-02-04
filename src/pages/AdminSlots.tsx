@@ -7,7 +7,7 @@ import { exportTeacherSlotsToICal } from '../utils/icalExport';
 import { teacherDisplayName, teacherGroupKey } from '../utils/teacherDisplayName';
 import './AdminDashboard.css';
 import { Sidebar } from '../components/Sidebar';
-import { ExperimentalHeader } from '../components/ExperimentalHeader';
+import { Header } from '../components/Header';
 
 export function AdminSlots() {
   const [teachers, setTeachers] = useState<ApiTeacher[]>([]);
@@ -133,7 +133,7 @@ export function AdminSlots() {
 
   return (
     <div className="admin-dashboard">
-      <ExperimentalHeader
+      <Header
         sectionLabel="Admin · Slots verwalten"
         userLabel={user?.fullName || user?.username}
         menu={
@@ -164,6 +164,9 @@ export function AdminSlots() {
                 <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/users'); close(); }}>
                   <span>Benutzer & Rechte verwalten</span>
                 </button>
+                <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/feedback'); close(); }}>
+                  <span>Feedback einsehen</span>
+                </button>
 
                 {canSwitchView && (
                   <>
@@ -174,7 +177,7 @@ export function AdminSlots() {
                       className={activeView === 'teacher' ? 'dropdown__item dropdown__item--active' : 'dropdown__item'}
                       onClick={() => {
                         setActiveView('teacher');
-                        navigate('/teacher', { replace: true });
+                        navigate('/teacher/bookings', { replace: true });
                         close();
                       }}
                     >

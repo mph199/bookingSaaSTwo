@@ -27,6 +27,7 @@ Dieser Leitfaden hilft KI-Assistenzsystemen (und neuen Entwickler:innen), sich s
 - `src/App.tsx`: Routing-Setup, Protected-Routes für Admin/Teacher.
 - `src/main.tsx`: Root-Render; aktuell ohne globalen Toast-Provider.
 - `src/components/AppErrorBoundary.tsx`: Globale ErrorBoundary um die App-Routen (in `App.tsx` aktiv verdrahtet).
+- `src/components/Header.tsx`: Standard-Header für Admin-/Teacher-Bereiche (Alias auf den historischen Namen `ExperimentalHeader`).
 - `src/pages/MaintenancePage.tsx`: Wartungsseite; kann per Env-Flag aktiviert werden.
 - `src/components/BookingApp.tsx`: Haupt-UI, Lehrerfilter, Slotliste, Booking-Flow.
 - `src/components/BookingForm.tsx`: Formular für Buchungen; validiert je nach Besuchertyp.
@@ -45,7 +46,8 @@ Hinweis (Wartungsmodus): Das Frontend kann per Env `VITE_MAINTENANCE_MODE=true|1
 
 ## Routing
 - Öffentlich: `/` (BookingApp), `/login`, `/impressum`, `/datenschutz`, `/verify` (E-Mail-Bestätigung)
-- Geschützt: `/admin/*` (Dashboard, Lehrkräfte, Slots, Elternsprechtage), `/teacher/*` (Dashboard der Lehrkraft)
+- Geschützt: `/admin/*` (Dashboard, Lehrkräfte, Slots, Elternsprechtage), `/teacher/*` (Bereich für Lehrkräfte mit Sidebar)
+  - Lehrkraft-Unterseiten: `/teacher/bookings`, `/teacher/room`, `/teacher/password`, `/teacher/feedback`
 - Catch-All: `*` → Redirect auf `/`
 
 ## Authentifizierung
@@ -106,8 +108,12 @@ Hinweis: In der UI werden Slots typischerweise über die öffentlichen Slots pro
   - Erfolg/Fehler via klare UI-Meldungen (später Toaster möglich).
 - Admin-Events:
   - `src/pages/AdminEvents.tsx`: Events verwalten, Slots generieren, Status (draft/published/closed) setzen.
-- Teacher-Dashboard:
-  - `src/pages/TeacherDashboard.tsx`; Storno via `api.teacher.cancelBooking` und danach `load()`.
+- Teacher-Bereich (Sidebar):
+  - Layout/Navigation: `src/pages/teacher/TeacherLayout.tsx`
+  - Buchungen: `src/pages/teacher/TeacherBookings.tsx` (Storno via `api.teacher.cancelBooking`, Bestätigen via `api.teacher.acceptBooking`)
+  - Raum: `src/pages/teacher/TeacherRoom.tsx` (Speichern via `api.teacher.updateRoom`)
+  - Passwort: `src/pages/teacher/TeacherPassword.tsx` (via `api.teacher.changePassword`)
+  - Feedback: `src/pages/teacher/TeacherFeedback.tsx` (anonym via `api.teacher.submitFeedback`)
 
 ## Commit-Hygiene (Konventionen)
 - Verwende konventionelle Nachrichten:
@@ -148,4 +154,4 @@ git push origin main
 - Erweiterte Toast-Details: Zeit/Datum/Name in Meldungen.
 
 ---
-Bei Unsicherheit: Suche zuerst in `src/services/api.ts`, `src/components/BookingApp.tsx`, `src/hooks/useBooking.ts` und den jeweiligen Seiten (`AdminSlots.tsx`, `TeacherDashboard.tsx`). Diese spiegeln die Kernlogik der App.
+Bei Unsicherheit: Suche zuerst in `src/services/api.ts`, `src/components/BookingApp.tsx`, `src/hooks/useBooking.ts` und den jeweiligen Seiten (`AdminSlots.tsx`, `src/pages/teacher/*`). Diese spiegeln die Kernlogik der App.

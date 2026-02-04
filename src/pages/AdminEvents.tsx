@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/useAuth';
 import api from '../services/api';
 import './AdminDashboard.css';
 import { Sidebar } from '../components/Sidebar';
-import { ExperimentalHeader } from '../components/ExperimentalHeader';
+import { Header } from '../components/Header';
 
 type AdminEvent = {
   id: number;
@@ -222,7 +222,7 @@ export function AdminEvents() {
 
   return (
     <div className="admin-dashboard">
-      <ExperimentalHeader
+      <Header
         sectionLabel="Admin · Elternsprechtage verwalten"
         userLabel={user?.fullName || user?.username}
         menu={
@@ -253,6 +253,9 @@ export function AdminEvents() {
                 <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/users'); close(); }}>
                   <span>Benutzer & Rechte verwalten</span>
                 </button>
+                <button type="button" className="dropdown__item" onClick={() => { navigate('/admin/feedback'); close(); }}>
+                  <span>Feedback einsehen</span>
+                </button>
 
                 {canSwitchView && (
                   <>
@@ -263,7 +266,7 @@ export function AdminEvents() {
                       className={activeView === 'teacher' ? 'dropdown__item dropdown__item--active' : 'dropdown__item'}
                       onClick={() => {
                         setActiveView('teacher');
-                        navigate('/teacher', { replace: true });
+                        navigate('/teacher/bookings', { replace: true });
                         close();
                       }}
                     >

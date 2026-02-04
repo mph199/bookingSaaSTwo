@@ -205,6 +205,7 @@ export const BookingApp = () => {
           )}
 
           <BookingForm
+            selectedTeacherId={selectedTeacherId}
             selectedSlotId={selectedSlotId}
             onSubmit={handleBooking}
             onCancel={resetSelection}

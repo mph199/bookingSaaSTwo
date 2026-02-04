@@ -17,6 +17,7 @@ type SidebarProps = {
   buttonClassName?: string;
   noWrapper?: boolean;
   icon?: ReactNode;
+  footer?: ReactNode;
   children: (ctx: SidebarRenderCtx) => ReactNode;
 };
 
@@ -38,6 +39,7 @@ export function Sidebar({
   buttonClassName,
   noWrapper = false,
   icon,
+  footer,
   children,
 }: SidebarProps) {
   const [open, setOpen] = useState(false);
@@ -227,6 +229,7 @@ export function Sidebar({
             </button>
           </div>
           <div className="sidebar__content">{children({ close })}</div>
+          {footer ? <div className="sidebar__footer">{footer}</div> : null}
         </aside>
       </div>,
       document.body

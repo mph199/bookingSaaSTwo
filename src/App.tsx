@@ -8,7 +8,12 @@ import { AdminTeachers } from './pages/AdminTeachers';
 import { AdminSlots } from './pages/AdminSlots';
 import { AdminEvents } from './pages/AdminEvents';
 import { AdminUsers } from './pages/AdminUsers';
-import { TeacherDashboard } from './pages/TeacherDashboard';
+import { AdminFeedback } from './pages/AdminFeedback';
+import { TeacherLayout } from './pages/teacher/TeacherLayout';
+import { TeacherBookings } from './pages/teacher/TeacherBookings';
+import { TeacherPassword } from './pages/teacher/TeacherPassword';
+import { TeacherRoom } from './pages/teacher/TeacherRoom';
+import { TeacherFeedback } from './pages/teacher/TeacherFeedback';
 import { Impressum } from './pages/Impressum';
 import { Datenschutz } from './pages/Datenschutz';
 import { VerifyEmail } from './pages/VerifyEmail';
@@ -41,14 +46,20 @@ function App() {
               <Route path="/verify" element={<VerifyEmail />} />
               
               {/* Geschützter Teacher-Bereich */}
-              <Route 
+              <Route
                 path="/teacher"
                 element={
                   <ProtectedRoute>
-                    <TeacherDashboard />
+                    <TeacherLayout />
                   </ProtectedRoute>
                 }
-              />
+              >
+                <Route index element={<Navigate to="/teacher/bookings" replace />} />
+                <Route path="bookings" element={<TeacherBookings />} />
+                <Route path="password" element={<TeacherPassword />} />
+                <Route path="room" element={<TeacherRoom />} />
+                <Route path="feedback" element={<TeacherFeedback />} />
+              </Route>
 
               {/* Admin-Bereich ist immer erreichbar, auch im Maintenance-Modus */}
               <Route 
@@ -88,6 +99,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <AdminUsers />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/feedback" 
+                element={
+                  <ProtectedRoute>
+                    <AdminFeedback />
                   </ProtectedRoute>
                 } 
               />
