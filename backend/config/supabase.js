@@ -13,10 +13,14 @@ if (!process.env.SUPABASE_SERVICE_ROLE_KEY || !process.env.SUPABASE_URL) {
   dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 }
 
-const supabaseUrl = process.env.SUPABASE_URL || 'https://hkavljocvckejejcwatw.supabase.co';
+const supabaseUrl = process.env.SUPABASE_URL;
 // Backend should use a server-side key (service role) so RLS-enabled tables work correctly.
 // Keep this key on the server only; never expose it to the frontend.
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+
+if (!supabaseUrl) {
+  throw new Error('SUPABASE_URL environment variable is required');
+}
 
 if (!supabaseKey) {
   throw new Error('SUPABASE_SERVICE_ROLE_KEY (preferred) or SUPABASE_KEY environment variable is required');

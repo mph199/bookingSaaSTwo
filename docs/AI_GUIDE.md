@@ -11,17 +11,23 @@ Dieser Leitfaden hilft KI-Assistenzsystemen (und neuen Entwickler:innen), sich s
 - Voraussetzungen: Node 18+ und npm.
 - Frontend starten:
   ```bash
-  cd /workspaces/elternsprechtagNavi_01_12_2025
+  cd /workspaces/bookingSaaSTwo
   npm install
   npm run dev   # Standard Port 5173, weicht bei Konflikt aus
   ```
 - Backend starten:
   ```bash
-  cd /workspaces/elternsprechtagNavi_01_12_2025/backend
+  cd /workspaces/bookingSaaSTwo/backend
   npm install
-  # .env mit Supabase-Keys und JWT-Secret notwendig (siehe `backend/config/supabase.js`)
+  # .env notwendig (Supabase + JWT + optional Mail). Template: `backend/.env.example`
   npm run dev   # Port 4000
   ```
+
+Wichtige Backend-Env-Variablen (für neues Supabase Projekt):
+- `SUPABASE_URL` und `SUPABASE_SERVICE_ROLE_KEY` (Backend nutzt bevorzugt Service-Role, sonst RLS-Schreibfehler möglich)
+- `JWT_SECRET` (signiert Login-Tokens)
+- `PUBLIC_BASE_URL` (Basis-URL für Links in E-Mails, z.B. Verify-Link)
+- Optional: `FRONTEND_URL` (CORS Allow-List), `MAIL_TRANSPORT=ethereal` (Dev) oder SMTP-Variablen (`SMTP_HOST`, `SMTP_USER`, ...)
 
 ## Architektur & Schlüsseldateien
 - `src/App.tsx`: Routing-Setup, Protected-Routes für Admin/Teacher.
@@ -129,15 +135,15 @@ Hinweis: In der UI werden Slots typischerweise über die öffentlichen Slots pro
 ## Schnellbefehle
 ```bash
 # Frontend starten
-cd /workspaces/elternsprechtagNavi_01_12_2025
+cd /workspaces/bookingSaaSTwo
 npm run dev
 
 # Backend starten
-cd /workspaces/elternsprechtagNavi_01_12_2025/backend
+cd /workspaces/bookingSaaSTwo/backend
 npm run dev
 
 # Git
-cd /workspaces/elternsprechtagNavi_01_12_2025
+cd /workspaces/bookingSaaSTwo
 git status
 git add -A && git commit -m "feat: …"
 git push origin main
